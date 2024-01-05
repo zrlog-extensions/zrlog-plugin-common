@@ -1,9 +1,9 @@
 package com.zrlog.plugin.client;
 
-import com.hibegin.common.util.IOUtil;
 import com.zrlog.plugin.IOSession;
 import com.zrlog.plugin.api.*;
 import com.zrlog.plugin.common.ConfigKit;
+import com.zrlog.plugin.common.IOUtil;
 import com.zrlog.plugin.common.IdUtil;
 import com.zrlog.plugin.common.LoggerUtil;
 import com.zrlog.plugin.data.codec.MsgPacketStatus;
