@@ -1,4 +1,4 @@
-zrlog-plugin-core/.idea
+zrlog-plugin-common/.idea
 **/logs
 *.pid
 *.jar

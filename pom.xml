@@ -29,14 +29,14 @@
         </developer>
     </developers>
     <scm>
-        <connection>scm:git:https://gitee.com/94fzb/zrlog-plugin-core</connection>
-        <developerConnection>scm:git:https://gitee.com/94fzb/zrlog-plugin-core</developerConnection>
-        <url>https://gitee.com/94fzb/zrlog-plugin-core</url>
+        <connection>scm:git:https://github.com/94fzb/zrlog-plugin-common</connection>
+        <developerConnection>scm:git:https://github.com/94fzb/zrlog-plugin-common</developerConnection>
+        <url>https://github.com/94fzb/zrlog-plugin-common</url>
         <tag>zrlog-plugin-parent-2.1.10</tag>
     </scm>
     <issueManagement>
         <system>Github Issue</system>
-        <url>https://github.com/94fzb/zrlog-plugin-core</url>
+        <url>https://github.com/94fzb/zrlog-plugin-common</url>
     </issueManagement>
     <licenses>
         <license>
