@@ -12,6 +12,7 @@ import com.zrlog.plugin.render.IRenderHandler;
 import com.zrlog.plugin.type.ActionType;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.nio.channels.Channel;
@@ -162,11 +163,21 @@ public class IOSession {
             if (msgPacket.getStatus() == MsgPacketStatus.RESPONSE_SUCCESS || msgPacket.getStatus() == MsgPacketStatus.RESPONSE_ERROR) {
                 PipeInfo pipeInfo = pipeMap.get(msgPacket.getMsgId());
                 if (pipeInfo != null) {
-                    PipedOutputStream outputStream = pipeInfo.getPipedOut();
                     IMsgPacketCallBack callBack = pipeMap.get(msgPacket.getMsgId()).getiMsgPacketCallBack();
                     pipeInfo.setResponseMsgPacket(msgPacket);
-                    outputStream.write(msgPacket.getData().array());
-                    outputStream.close();
+                    //pipe必须异步，不然过大的内容可能导致卡住
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            try (PipedOutputStream outputStream = pipeInfo.getPipedOut()) {
+                                outputStream.write(msgPacket.getData().array());
+                                outputStream.flush();
+                            } catch (IOException e) {
+                                //throw new RuntimeException(e);
+                            }
+                            //System.out.println("callBack = " + callBack);
+                        }
+                    }).start();
                     if (callBack != null) {
                         callBack.handler(msgPacket);
                         // 不进行多次处理

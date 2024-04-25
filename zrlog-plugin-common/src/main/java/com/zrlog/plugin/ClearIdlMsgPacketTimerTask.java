@@ -1,9 +1,7 @@
 package com.zrlog.plugin;
 
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.TimerTask;
+import java.io.PipedInputStream;
+import java.util.*;
 
 public class ClearIdlMsgPacketTimerTask extends TimerTask {
 
@@ -23,6 +21,14 @@ public class ClearIdlMsgPacketTimerTask extends TimerTask {
             }
         }
         for (Integer i : integerSet) {
+            PipedInputStream pipedIn = pipeMap.get(i).getPipedIn();
+            if (Objects.nonNull(pipedIn)) {
+                try {
+                    pipedIn.close();
+                } catch (Exception e) {
+                    //throw new RuntimeException(e);
+                }
+            }
             pipeMap.remove(i);
         }
     }
