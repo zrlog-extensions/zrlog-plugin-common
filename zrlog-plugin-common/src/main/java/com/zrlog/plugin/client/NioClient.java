@@ -45,55 +45,49 @@ public class NioClient {
         this.renderHandler = renderHandler;
     }
 
-    public void connectServer(String[] args, List<Class> classList,
-                              Class<? extends IPluginAction> pluginAction) throws IOException {
+    public void connectServer(String[] args, List<Class> classList, Class<? extends IPluginAction> pluginAction) throws IOException {
         connectServer(args, classList, pluginAction, new ArrayList<>());
     }
 
-    public void connectServer(String[] args, List<Class> classList,
-                              Class<? extends IPluginAction> pluginAction, Class<? extends IPluginService> service) throws IOException {
+    public void connectServer(String[] args, List<Class> classList, Class<? extends IPluginAction> pluginAction, Class<? extends IPluginService> service) throws IOException {
         List<Class<? extends IPluginService>> serviceList = new ArrayList<>();
         serviceList.add(service);
         connectServer(args, classList, pluginAction, serviceList);
     }
 
-    public void connectServer(String[] args, List<Class> classList,
-                              Class<? extends IPluginAction> pluginAction, List<Class<? extends IPluginService>> serviceList) throws IOException {
+    public void connectServer(String[] args, List<Class> classList, Class<? extends IPluginAction> pluginAction, List<Class<? extends IPluginService>> serviceList) throws IOException {
         System.setProperty("java.util.logging.SimpleFormatter.format", "%1$tY-%1$tm-%1$td %1$tH:%1$tM:%1$tS %4$s %5$s%6$s%n");
         Plugin plugin = new Plugin();
         String propertiesPath = "/plugin.properties";
-        InputStream in = NioClient.class.getResourceAsStream(propertiesPath);
-        if (in == null) {
-            throw new IOException("not found properties file " + propertiesPath);
-        }
-        Properties properties = new Properties();
-        properties.load(in);
-        plugin.setVersion(properties.getProperty("version", ""));
-        plugin.setName(properties.getProperty("name", ""));
-        plugin.setDesc(properties.getProperty("desc", ""));
-        if (properties.get("dependentService") != null) {
-            plugin.setDependentService(new LinkedHashSet<>(Arrays.asList(properties.get("dependentService").toString().split(","))));
-        }
-        if (properties.get("paths") != null) {
-            plugin.setPaths(new LinkedHashSet<>(Arrays.asList(properties.get("paths").toString().split(","))));
-        }
-        if (properties.get("actions") != null) {
-            plugin.setActions(new LinkedHashSet<>(Arrays.asList(properties.get("actions").toString().split(","))));
-        }
-        plugin.setShortName(properties.getProperty("shortName", ""));
-        plugin.setAuthor(properties.getProperty("author", ""));
-        plugin.setIndexPage(properties.getProperty("indexPage", ""));
-        InputStream inputStream = NioClient.class.getResourceAsStream("/preview-image.base64");
-        if (inputStream != null) {
-            try {
-                plugin.setPreviewImageBase64(new String(IOUtil.getByteByInputStream(inputStream)));
-            } finally {
-                inputStream.close();
+        try (InputStream in = NioClient.class.getResourceAsStream(propertiesPath)) {
+            if (in == null) {
+                throw new IOException("not found properties file " + propertiesPath);
             }
-        } else {
-            plugin.setPreviewImageBase64("");
+            Properties properties = new Properties();
+            properties.load(in);
+            plugin.setVersion(properties.getProperty("version", ""));
+            plugin.setName(properties.getProperty("name", ""));
+            plugin.setDesc(properties.getProperty("desc", ""));
+            if (properties.get("dependentService") != null) {
+                plugin.setDependentService(new LinkedHashSet<>(Arrays.asList(properties.get("dependentService").toString().split(","))));
+            }
+            if (properties.get("paths") != null) {
+                plugin.setPaths(new LinkedHashSet<>(Arrays.asList(properties.get("paths").toString().split(","))));
+            }
+            if (properties.get("actions") != null) {
+                plugin.setActions(new LinkedHashSet<>(Arrays.asList(properties.get("actions").toString().split(","))));
+            }
+            plugin.setShortName(properties.getProperty("shortName", ""));
+            plugin.setAuthor(properties.getProperty("author", ""));
+            plugin.setIndexPage(properties.getProperty("indexPage", ""));
+            try (InputStream inputStream = NioClient.class.getResourceAsStream("/preview-image.base64")) {
+                if (inputStream != null) {
+                    plugin.setPreviewImageBase64(new String(IOUtil.getByteByInputStream(inputStream)));
+                } else {
+                    plugin.setPreviewImageBase64("");
+                }
+            }
         }
-        in.close();
         if (serviceList != null && !serviceList.isEmpty()) {
             for (Class<? extends IPluginService> serviceClass : serviceList) {
                 Service service = serviceClass.getAnnotation(Service.class);
@@ -115,8 +109,7 @@ public class NioClient {
         connectServer(serverAddress, classList, plugin, pluginAction, serviceList);
     }
 
-    private void connectServer(InetSocketAddress serverAddress, List<Class> classList, Plugin plugin, Class<? extends IPluginAction> pluginAction,
-                               List<Class<? extends IPluginService>> serviceList) {
+    private void connectServer(InetSocketAddress serverAddress, List<Class> classList, Plugin plugin, Class<? extends IPluginAction> pluginAction, List<Class<? extends IPluginService>> serviceList) {
         if (actionHandler == null) {
             actionHandler = new ClientActionHandler();
         }
