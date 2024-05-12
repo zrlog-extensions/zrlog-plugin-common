@@ -21,4 +21,12 @@ public enum ActionType {
         this.level = level;
         this.desc = desc;
     }
+
+    public int getLevel() {
+        return level;
+    }
+
+    public String getDesc() {
+        return desc;
+    }
 }

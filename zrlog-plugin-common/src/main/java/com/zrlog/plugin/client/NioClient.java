@@ -106,7 +106,7 @@ public class NioClient {
         //parse args
         int serverPort = ConfigKit.getServerPort();
         if (args != null && args.length > 0) {
-            serverPort = Integer.valueOf(args[0]);
+            serverPort = Integer.parseInt(args[0]);
         }
         if (args != null && args.length > 1) {
             plugin.setId(args[1]);

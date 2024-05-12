@@ -5,7 +5,11 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.Objects;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -17,7 +21,7 @@ public class LoggerUtil {
     private static final String LOG_FOLDER_NAME = "log";
     private static final String LOG_FILE_SUFFIX = ".log";
     private static FileHandler fileHandler;
-    private static final Logger LOGGER = LoggerUtil.getLogger(LoggerUtil.class);
+    private static final Lock loadLock = new ReentrantLock();
 
     static {
         try {
@@ -28,24 +32,33 @@ public class LoggerUtil {
             fileHandler = new FileHandler(fileName.toString(), true);
             fileHandler.setFormatter(new SimpleFormatter());
         } catch (IOException e) {
-            LOGGER.log(Level.SEVERE, "", e);
+            getLogger(LoggerUtil.class).severe("Init logger error " + e.getMessage());
         }
     }
 
     private LoggerUtil() {
     }
 
-    public static Logger getLogger(Class clazz) {
-        Logger logger = Logger.getLogger(clazz.getName());
+    public static Logger getLogger(Class<?> clazz) {
+        loadLock.lock();
         try {
-            if (fileHandler != null) {
-                logger.addHandler(fileHandler);
+            Logger logger = Logger.getLogger(clazz.getName());
+            //避免重复添加 handle
+            if (Arrays.stream(logger.getHandlers()).anyMatch(x -> Objects.equals(x, fileHandler))) {
+                return logger;
             }
-            logger.setLevel(Level.ALL);
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, recordStackTraceMsg(e));
+            try {
+                if (fileHandler != null) {
+                    logger.addHandler(fileHandler);
+                }
+                logger.setLevel(Level.ALL);
+            } catch (Exception e) {
+                logger.severe("Init logger error " + e.getMessage());
+            }
+            return logger;
+        } finally {
+            loadLock.unlock();
         }
-        return logger;
     }
 
     private synchronized static String getLogFilePath() {
@@ -68,8 +81,6 @@ public class LoggerUtil {
 
     /**
      * 记录完善的异常日志信息(包括堆栈信息)
-     *
-     * @param e Exception
      */
     public static String recordStackTraceMsg(Exception e) {
         StringWriter stringWriter = new StringWriter();
