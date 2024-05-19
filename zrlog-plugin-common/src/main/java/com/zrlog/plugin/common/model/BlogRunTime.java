@@ -1,4 +1,4 @@
-package com.zrlog.plugin.common.modle;
+package com.zrlog.plugin.common.model;
 
 public class BlogRunTime {
 

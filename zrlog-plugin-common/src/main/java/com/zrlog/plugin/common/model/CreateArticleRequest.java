@@ -1,4 +1,4 @@
-package com.zrlog.plugin.common.modle;
+package com.zrlog.plugin.common.model;
 
 
 import java.util.Date;
