@@ -22,11 +22,9 @@ import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 import java.util.*;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class NioClient {
 
-    private static final Logger LOGGER = LoggerUtil.getLogger(NioClient.class);
 
     private IConnectHandler connectHandler;
     private IRenderHandler renderHandler;
@@ -161,7 +159,7 @@ public class NioClient {
     }
 
     private void exitPlugin(Exception e) {
-        LOGGER.log(Level.SEVERE, "", e);
+        LoggerUtil.getLogger(NioClient.class).log(Level.SEVERE, "", e);
         System.exit(1);
     }
 }
