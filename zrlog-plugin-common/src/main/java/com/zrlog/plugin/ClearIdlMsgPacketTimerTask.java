@@ -17,7 +17,7 @@ public class ClearIdlMsgPacketTimerTask implements Runnable {
             Set<Integer> integerSet = new HashSet<>();
             for (Map.Entry<Integer, PipeInfo> entry : pipeMap.entrySet()) {
                 long activeTime = System.currentTimeMillis() - entry.getValue().getCratedAt();
-                if (activeTime > 60000) {
+                if (activeTime > 60000 * 10) {
                     integerSet.add(entry.getKey());
                 }
             }
