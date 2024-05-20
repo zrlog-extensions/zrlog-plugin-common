@@ -103,6 +103,9 @@ public class NioClient {
         if (args != null && args.length > 1) {
             plugin.setId(args[1]);
         }
+        if (Objects.isNull(plugin.getId())) {
+            plugin.setId(UUID.randomUUID().toString());
+        }
         InetSocketAddress serverAddress = new InetSocketAddress("127.0.0.1", serverPort);
         connectServer(serverAddress, classList, plugin, pluginAction, serviceList);
     }
@@ -111,19 +114,18 @@ public class NioClient {
         if (actionHandler == null) {
             actionHandler = new ClientActionHandler();
         }
-        try {
-            SocketChannel socketChannel = SocketChannel.open();
+        try (SocketChannel socketChannel = SocketChannel.open()) {
             socketChannel.configureBlocking(false);
             Selector selector = Selector.open();
-            Iterator iterator;
+
             Set<SelectionKey> selectionKeys;
             socketChannel.register(selector, SelectionKey.OP_CONNECT);
             socketChannel.connect(serverAddress);
             IOSession session = null;
-            while (true) {
+            while (selector.isOpen()) {
                 selector.select();
                 selectionKeys = selector.selectedKeys();
-                iterator = selectionKeys.iterator();
+                Iterator iterator = selectionKeys.iterator();
                 while (iterator.hasNext()) {
                     try {
                         SelectionKey selectionKey = (SelectionKey) iterator.next();
@@ -142,8 +144,13 @@ public class NioClient {
                             }
                             session.sendJsonMsg(plugin, ActionType.INIT_CONNECT.name(), IdUtil.getInt(), MsgPacketStatus.SEND_REQUEST);
                         } else if (selectionKey.isReadable()) {
-                            SocketDecode decode = new SocketDecode();
-                            while (!decode.doDecode(session)) ;
+                            if (Objects.nonNull(session)) {
+                                SocketDecode decode = new SocketDecode();
+                                while (!decode.doDecode(session)) {
+                                    //ignore
+                                }
+                            }
+
                         }
                     } catch (Exception e) {
                         exitPlugin(e);
