@@ -19,8 +19,9 @@ import java.nio.channels.Channel;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 import java.util.Map;
-import java.util.Timer;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -39,7 +40,12 @@ public class IOSession {
     private final MsgPacketDispose msgPacketDispose = new MsgPacketDispose();
     private final IRenderHandler renderHandler;
     private final SocketEncode socketEncode;
-    private final Timer timer;
+
+    private static final ClearIdlMsgPacketTimerTask clearIdlMsgPacketTimerTask = new ClearIdlMsgPacketTimerTask();
+
+    static {
+        Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(clearIdlMsgPacketTimerTask, 0, 1, TimeUnit.SECONDS);
+    }
 
     public IOSession(SocketChannel channel, Selector selector, SocketCodec socketCodec, IActionHandler actionHandler, IRenderHandler renderHandler) {
         systemAttr.put("_channel", channel);
@@ -50,9 +56,7 @@ public class IOSession {
         this.socketEncode = socketCodec.getSocketEncode();
         this.actionHandler = actionHandler;
         this.renderHandler = renderHandler;
-        this.timer = new Timer();
-        this.timer.scheduleAtFixedRate(new ClearIdlMsgPacketTimerTask(pipeMap), 0, 1000);
-
+        clearIdlMsgPacketTimerTask.addTask(pipeMap);
     }
 
     public IOSession(SocketChannel channel, Selector selector, SocketCodec socketCodec, IActionHandler actionHandler) {
@@ -194,7 +198,7 @@ public class IOSession {
     public void close() {
         try {
             ((Channel) systemAttr.get("_channel")).close();
-            timer.cancel();
+            clearIdlMsgPacketTimerTask.removePipeMap(pipeMap);
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "", e);
         }
