@@ -1,14 +1,21 @@
 package com.zrlog.plugin.common;
 
+import com.google.gson.Gson;
 import com.zrlog.plugin.IOSession;
+import com.zrlog.plugin.common.model.*;
+import com.zrlog.plugin.common.response.UploadFileResponseEntry;
+import com.zrlog.plugin.data.codec.FileDesc;
 import com.zrlog.plugin.data.codec.HttpRequestInfo;
 import com.zrlog.plugin.data.codec.MsgPacket;
+import com.zrlog.plugin.data.codec.User;
+import com.zrlog.plugin.message.Plugin;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 
@@ -51,5 +58,19 @@ public class PluginNativeImageUtils {
                 ex.printStackTrace();
             }
         });
+    }
+
+    public static void usedGsonObject() {
+        new Gson().toJson(new FileDesc());
+        new Gson().toJson(new HashMap<>());
+        new Gson().toJson(new HttpRequestInfo());
+        new Gson().toJson(new Plugin());
+        new Gson().toJson(new BlogRunTime());
+        new Gson().toJson(new Comment());
+        new Gson().toJson(new CreateArticleRequest());
+        new Gson().toJson(new PublicInfo());
+        new Gson().toJson(new TemplatePath());
+        new Gson().toJson(new UploadFileResponseEntry());
+        new Gson().toJson(new User());
     }
 }
