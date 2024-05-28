@@ -19,8 +19,9 @@ import java.nio.channels.Channel;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 import java.util.Map;
-import java.util.Timer;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -35,11 +36,16 @@ public class IOSession {
     private final Map<String, Object> systemAttr = new ConcurrentHashMap<>();
     private final IActionHandler actionHandler;
     private Plugin plugin;
-    private final AtomicInteger msgIds = new AtomicInteger();
+    private final AtomicInteger msgCounter = new AtomicInteger();
     private final MsgPacketDispose msgPacketDispose = new MsgPacketDispose();
     private final IRenderHandler renderHandler;
     private final SocketEncode socketEncode;
-    private final Timer timer;
+
+    private static final ClearIdlMsgPacketTimerTask clearIdlMsgPacketTimerTask = new ClearIdlMsgPacketTimerTask();
+
+    static {
+        Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(clearIdlMsgPacketTimerTask, 0, 1, TimeUnit.SECONDS);
+    }
 
     public IOSession(SocketChannel channel, Selector selector, SocketCodec socketCodec, IActionHandler actionHandler, IRenderHandler renderHandler) {
         systemAttr.put("_channel", channel);
@@ -50,9 +56,7 @@ public class IOSession {
         this.socketEncode = socketCodec.getSocketEncode();
         this.actionHandler = actionHandler;
         this.renderHandler = renderHandler;
-        this.timer = new Timer();
-        this.timer.scheduleAtFixedRate(new ClearIdlMsgPacketTimerTask(pipeMap), 0, 1000);
-
+        clearIdlMsgPacketTimerTask.addTask(pipeMap);
     }
 
     public IOSession(SocketChannel channel, Selector selector, SocketCodec socketCodec, IActionHandler actionHandler) {
@@ -69,18 +73,22 @@ public class IOSession {
 
     public <T> T getResponseSync(ContentType contentType, Object data, ActionType actionType, Class<T> clazz) {
         int msgId = IdUtil.getInt();
-        MsgPacketStatus status = MsgPacketStatus.SEND_REQUEST;
-        MsgPacket msgPacket = new MsgPacket(data, contentType, status, msgId, actionType.name());
-        sendMsg(msgPacket);
-        MsgPacket response = getResponseMsgPacketByMsgId(msgId);
-        if (response.getStatus() == MsgPacketStatus.RESPONSE_SUCCESS) {
-            if (response.getContentType() == ContentType.JSON) {
-                return new JsonConvertMsgBody().toObj(response.getData(), clazz);
+        try {
+            MsgPacketStatus status = MsgPacketStatus.SEND_REQUEST;
+            MsgPacket msgPacket = new MsgPacket(data, contentType, status, msgId, actionType.name());
+            sendMsg(msgPacket);
+            MsgPacket response = getResponseMsgPacketByMsgId(msgId);
+            if (response.getStatus() == MsgPacketStatus.RESPONSE_SUCCESS) {
+                if (response.getContentType() == ContentType.JSON) {
+                    return new JsonConvertMsgBody().toObj(response.getData(), clazz);
+                }
+            } else {
+                throw new RuntimeException("some error");
             }
-        } else {
-            throw new RuntimeException("some error");
+            throw new RuntimeException("unSupport response " + response.getContentType());
+        } finally {
+            pipeMap.remove(msgId);
         }
-        throw new RuntimeException("unSupport response " + response.getContentType());
     }
 
     public void sendMsg(ContentType contentType, Object data, String methodStr, int msgId, MsgPacketStatus status, IMsgPacketCallBack callBack) {
@@ -98,7 +106,7 @@ public class IOSession {
             PipedInputStream in = new PipedInputStream();
             PipedOutputStream out = new PipedOutputStream(in);
             pipeMap.put(msgPacket.getMsgId(), new PipeInfo(msgPacket, null, in, out, callBack, System.currentTimeMillis()));
-            getAttr().put("count", msgIds.incrementAndGet());
+            getAttr().put("count", msgCounter.incrementAndGet());
             socketEncode.doEncode(this, msgPacket);
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "", e);
@@ -194,10 +202,14 @@ public class IOSession {
     public void close() {
         try {
             ((Channel) systemAttr.get("_channel")).close();
-            timer.cancel();
+            clearIdlMsgPacketTimerTask.removePipeMap(pipeMap);
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "", e);
         }
+    }
+
+    public Map<Integer, PipeInfo> getPipeMap() {
+        return pipeMap;
     }
 
     public Map<String, Object> getSystemAttr() {
