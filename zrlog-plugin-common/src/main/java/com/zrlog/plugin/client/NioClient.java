@@ -167,6 +167,6 @@ public class NioClient {
 
     private void exitPlugin(Exception e) {
         LoggerUtil.getLogger(NioClient.class).log(Level.SEVERE, "", e);
-        System.exit(1);
+        System.exit(0);
     }
 }
