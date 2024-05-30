@@ -15,9 +15,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 public class PluginNativeImageUtils {
 
@@ -63,6 +61,8 @@ public class PluginNativeImageUtils {
     public static void usedGsonObject() {
         new Gson().toJson(new FileDesc());
         new Gson().toJson(new HashMap<>());
+        new Gson().toJson(new TreeMap<>());
+        new Gson().fromJson("{}", Map.class);
         new Gson().toJson(new HttpRequestInfo());
         new Gson().toJson(new Plugin());
         new Gson().toJson(new BlogRunTime());

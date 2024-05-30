@@ -41,7 +41,7 @@ public class MsgPacket {
     }
 
     public MsgPacket() {
-        dStart = 0x5E;
+        dStart = PackageVersion.V1.getVersion();
     }
 
 

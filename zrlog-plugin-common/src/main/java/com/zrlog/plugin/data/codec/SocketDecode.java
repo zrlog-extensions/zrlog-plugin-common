@@ -9,6 +9,7 @@ import com.zrlog.plugin.type.RunType;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
+import java.util.Objects;
 import java.util.logging.Logger;
 
 public class SocketDecode {
@@ -34,7 +35,6 @@ public class SocketDecode {
 
     public boolean doDecode(final IOSession session) throws Exception {
         SocketChannel channel = (SocketChannel) session.getSystemAttr().get("_channel");
-        //LOGGER.info(channel.getRemoteAddress() + " decoding ");
         boolean flag = false;
         if (channel.isOpen() && !channel.socket().isClosed()) {
             if (packet.getDataLength() == -1) {
@@ -48,7 +48,14 @@ public class SocketDecode {
                         return false;
                     }
                     byte[] data = header.array();
-                    packet.setStatus(MsgPacketStatus.getMsgPacketStatus(data[1]));
+                    if (data[0] != PackageVersion.V1.getVersion()) {
+                        throw new RuntimeException("Unknown protocol version");
+                    }
+                    MsgPacketStatus msgPacketStatus = MsgPacketStatus.getMsgPacketStatus(data[1]);
+                    if (Objects.equals(msgPacketStatus, MsgPacketStatus.UNKNOWN)) {
+                        throw new RuntimeException("Unknown package status");
+                    }
+                    packet.setStatus(msgPacketStatus);
                     packet.setMethodLength(data[6]);
                     packet.setMsgId(HexaConversionUtil.byteArrayToInt(HexaConversionUtil.subByts(data, 2, 4)));
                     methodAndLengthAndContentType = ByteBuffer.allocate(packet.getMethodLength() + 4 + 1);
@@ -79,12 +86,7 @@ public class SocketDecode {
                 if (RunConstants.runType == RunType.DEV) {
                     LOGGER.info("recv <<< " + session.getAttr().get("count") + " " + packet);
                 }
-                new Thread() {
-                    @Override
-                    public void run() {
-                        session.dispose(packet);
-                    }
-                }.start();
+                new Thread(() -> session.dispose(packet)).start();
             }
         }
         return flag;

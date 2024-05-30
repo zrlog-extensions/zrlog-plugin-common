@@ -125,10 +125,10 @@ public class NioClient {
             while (selector.isOpen()) {
                 selector.select();
                 selectionKeys = selector.selectedKeys();
-                Iterator iterator = selectionKeys.iterator();
+                Iterator<SelectionKey> iterator = selectionKeys.iterator();
                 while (iterator.hasNext()) {
                     try {
-                        SelectionKey selectionKey = (SelectionKey) iterator.next();
+                        SelectionKey selectionKey = iterator.next();
                         SocketChannel channel = (SocketChannel) selectionKey.channel();
                         if (selectionKey.isConnectable()) {
                             if (channel.isConnectionPending()) {
