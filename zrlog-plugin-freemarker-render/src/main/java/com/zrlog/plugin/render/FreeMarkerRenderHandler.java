@@ -16,9 +16,9 @@ import java.util.logging.Logger;
 
 public class FreeMarkerRenderHandler implements IRenderHandler {
 
-    private static Configuration cfg = new Configuration(Configuration.VERSION_2_3_0);
-    private static String devEnvPath = PathKit.getRootPath() + "/src/main/resources";
-    private static Logger LOGGER = LoggerUtil.getLogger(FreeMarkerRenderHandler.class);
+    private static final Configuration cfg = new Configuration(Configuration.VERSION_2_3_0);
+    private static final String devEnvPath = PathKit.getRootPath() + "/src/main/resources";
+    private static final Logger LOGGER = LoggerUtil.getLogger(FreeMarkerRenderHandler.class);
 
     @Override
     public String render(String templatePath, Plugin plugin, Map<String, Object> map) {
@@ -46,9 +46,9 @@ public class FreeMarkerRenderHandler implements IRenderHandler {
             e.process(map, writer);
             writer.flush();
             writer.close();
-            return new String(out.toByteArray());
-        } catch (Exception var6) {
-            var6.printStackTrace();
+            return out.toString();
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "not found file ", e);
             return "";
         }
     }
