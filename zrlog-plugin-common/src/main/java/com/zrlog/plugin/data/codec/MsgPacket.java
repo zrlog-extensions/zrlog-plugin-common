@@ -22,22 +22,26 @@ public class MsgPacket {
         this.status = status;
         this.msgId = msgId;
         this.methodStr = methodStr;
-        ConvertMsgBody convertMsgBody = null;
-        if (contentType == ContentType.BYTE) {
-            convertMsgBody = new ByteConvertMsgBody();
-        } else if (contentType == ContentType.JSON) {
-            convertMsgBody = new JsonConvertMsgBody();
-        } else if (contentType == ContentType.HTML) {
-            convertMsgBody = new StringConvertMsgBody();
-        } else if (contentType == ContentType.FILE) {
-            convertMsgBody = new FileConvertMsgBody();
-        }
+        ConvertMsgBody convertMsgBody = getConvertMsgBody(contentType);
         if (convertMsgBody == null) {
             throw new RuntimeException("not found such convert " + contentType);
         }
         this.data = convertMsgBody.toByteBuffer(data);
         this.dataLength = this.data.array().length;
         this.methodLength = (byte) methodStr.getBytes().length;
+    }
+
+    private static ConvertMsgBody getConvertMsgBody(ContentType contentType) {
+        if (contentType == ContentType.BYTE) {
+            return new ByteConvertMsgBody();
+        } else if (contentType == ContentType.JSON) {
+            return new JsonConvertMsgBody();
+        } else if (contentType == ContentType.HTML || contentType == ContentType.XML) {
+            return new StringConvertMsgBody();
+        } else if (contentType == ContentType.FILE) {
+            return new FileConvertMsgBody();
+        }
+        return null;
     }
 
     public MsgPacket() {
