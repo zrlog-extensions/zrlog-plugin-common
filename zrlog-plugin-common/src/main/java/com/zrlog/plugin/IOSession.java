@@ -137,6 +137,10 @@ public class IOSession {
         sendMsg(ContentType.HTML, htmlString, method, id, MsgPacketStatus.RESPONSE_SUCCESS, null);
     }
 
+    public void responseXmlStr(String htmlString, String method, int id) {
+        sendMsg(ContentType.XML, htmlString, method, id, MsgPacketStatus.RESPONSE_SUCCESS, null);
+    }
+
     public void responseHtmlStr(String htmlString, String method, int id, IMsgPacketCallBack callBack) {
         sendMsg(ContentType.HTML, htmlString, method, id, MsgPacketStatus.RESPONSE_SUCCESS, callBack);
     }
