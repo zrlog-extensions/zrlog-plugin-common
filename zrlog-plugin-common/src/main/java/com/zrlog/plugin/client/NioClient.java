@@ -43,6 +43,13 @@ public class NioClient {
         this.renderHandler = renderHandler;
     }
 
+
+    public NioClient(IConnectHandler connectHandler, IRenderHandler renderHandler, IActionHandler actionHandler) {
+        this.connectHandler = connectHandler;
+        this.renderHandler = renderHandler;
+        this.actionHandler = actionHandler;
+    }
+
     public void connectServer(String[] args, List<Class> classList, Class<? extends IPluginAction> pluginAction) throws IOException {
         connectServer(args, classList, pluginAction, new ArrayList<>());
     }
