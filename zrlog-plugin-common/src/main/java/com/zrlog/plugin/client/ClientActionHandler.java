@@ -174,4 +174,9 @@ public class ClientActionHandler implements IActionHandler {
     public void createArticle(IOSession session, MsgPacket msgPacket) {
 
     }
+
+    @Override
+    public void refreshCache(IOSession session, MsgPacket msgPacket) {
+
+    }
 }

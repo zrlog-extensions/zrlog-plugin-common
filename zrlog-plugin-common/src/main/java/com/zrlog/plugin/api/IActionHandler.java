@@ -34,4 +34,6 @@ public interface IActionHandler {
     void getBlogRuntimePath(final IOSession session, final MsgPacket msgPacket);
 
     void createArticle(final IOSession session, final MsgPacket msgPacket);
+
+    void refreshCache(final IOSession session, final MsgPacket msgPacket);
 }
