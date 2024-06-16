@@ -21,6 +21,7 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 import java.util.*;
+import java.util.concurrent.Executors;
 import java.util.logging.Level;
 
 public class NioClient {
@@ -129,6 +130,7 @@ public class NioClient {
             socketChannel.register(selector, SelectionKey.OP_CONNECT);
             socketChannel.connect(serverAddress);
             IOSession session = null;
+            SocketDecode socketDecode = null;
             while (selector.isOpen()) {
                 selector.select();
                 selectionKeys = selector.selectedKeys();
@@ -141,7 +143,8 @@ public class NioClient {
                             if (channel.isConnectionPending()) {
                                 channel.finishConnect();
                             }
-                            session = new IOSession(channel, selector, new SocketCodec(new SocketEncode(), new SocketDecode()), actionHandler, renderHandler);
+                            socketDecode = new SocketDecode(Executors.newFixedThreadPool(4));
+                            session = new IOSession(channel, selector, new SocketCodec(new SocketEncode(), socketDecode), actionHandler, renderHandler);
                             session.setPlugin(plugin);
                             session.getAttr().put("_actionClassList", classList);
                             session.getAttr().put("_pluginClass", pluginAction);
@@ -151,13 +154,12 @@ public class NioClient {
                             }
                             session.sendJsonMsg(plugin, ActionType.INIT_CONNECT.name(), IdUtil.getInt(), MsgPacketStatus.SEND_REQUEST);
                         } else if (selectionKey.isReadable()) {
-                            if (Objects.nonNull(session)) {
-                                SocketDecode decode = new SocketDecode();
-                                while (!decode.doDecode(session)) {
-                                    //ignore
-                                }
+                            if (Objects.isNull(socketDecode)) {
+                                throw new RuntimeException("socketDecode is null");
                             }
-
+                            while (!socketDecode.doDecode(session)) {
+                                Thread.sleep(20);
+                            }
                         }
                     } catch (Exception e) {
                         exitPlugin(e);

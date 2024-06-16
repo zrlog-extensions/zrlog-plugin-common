@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 import java.util.Objects;
+import java.util.concurrent.Executor;
 import java.util.logging.Logger;
 
 public class SocketDecode {
@@ -20,8 +21,10 @@ public class SocketDecode {
     private MsgPacket packet;
     private final ByteBuffer header = ByteBuffer.allocate(7);
     private ByteBuffer methodAndLengthAndContentType;
+    private final Executor messageHandlerExecutor;
 
-    public SocketDecode() {
+    public SocketDecode(Executor messageHandlerExecutor) {
+        this.messageHandlerExecutor = messageHandlerExecutor;
         packet = new MsgPacket();
         packet.setDataLength(-1);
     }
@@ -90,7 +93,7 @@ public class SocketDecode {
             if (RunConstants.runType == RunType.DEV) {
                 LOGGER.info("recv <<< " + session.getAttr().get("count") + " " + packet);
             }
-            new Thread(() -> session.dispose(packet)).start();
+            messageHandlerExecutor.execute(() -> session.dispose(packet));
         }
         return flag;
     }
