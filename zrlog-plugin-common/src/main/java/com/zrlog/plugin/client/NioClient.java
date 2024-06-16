@@ -154,7 +154,7 @@ public class NioClient {
                             }
                             session.sendJsonMsg(plugin, ActionType.INIT_CONNECT.name(), IdUtil.getInt(), MsgPacketStatus.SEND_REQUEST);
                         } else if (selectionKey.isReadable()) {
-                            if (Objects.isNull(socketDecode)) {
+                            if (Objects.isNull(session)) {
                                 throw new RuntimeException("socketDecode is null");
                             }
                             while (!socketDecode.doDecode(session)) {

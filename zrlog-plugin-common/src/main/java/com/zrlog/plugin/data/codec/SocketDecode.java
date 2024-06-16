@@ -29,14 +29,6 @@ public class SocketDecode {
         packet.setDataLength(-1);
     }
 
-    public MsgPacket getPacket() {
-        return packet;
-    }
-
-    public void setPacket(MsgPacket packet) {
-        this.packet = packet;
-    }
-
     public boolean doDecode(final IOSession session) throws Exception {
         SocketChannel channel = (SocketChannel) session.getSystemAttr().get("_channel");
 
@@ -94,6 +86,8 @@ public class SocketDecode {
                 LOGGER.info("recv <<< " + session.getAttr().get("count") + " " + packet);
             }
             messageHandlerExecutor.execute(() -> session.dispose(packet));
+            packet = new MsgPacket();
+            packet.setDataLength(-1);
         }
         return flag;
     }
