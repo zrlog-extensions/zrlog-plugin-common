@@ -19,12 +19,18 @@ public class SocketDecode {
     private static final Logger LOGGER = LoggerUtil.getLogger(SocketDecode.class);
 
     private MsgPacket packet;
-    private final ByteBuffer header = ByteBuffer.allocate(7);
-    private ByteBuffer methodAndLengthAndContentType;
+    private ByteBuffer header = ByteBuffer.allocate(7);
+
     private final Executor messageHandlerExecutor;
 
     public SocketDecode(Executor messageHandlerExecutor) {
         this.messageHandlerExecutor = messageHandlerExecutor;
+        packet = new MsgPacket();
+        packet.setDataLength(-1);
+    }
+
+    private void reset() {
+        header = ByteBuffer.allocate(7);
         packet = new MsgPacket();
         packet.setDataLength(-1);
     }
@@ -38,6 +44,7 @@ public class SocketDecode {
         boolean flag = false;
         if (packet.getDataLength() == -1) {
             //read header
+            ByteBuffer methodAndLengthAndContentType = null;
             if (header.hasRemaining()) {
                 int length = channel.read(header);
                 if (length == -1) {
@@ -86,8 +93,7 @@ public class SocketDecode {
                 LOGGER.info("recv <<< " + session.getAttr().get("count") + " " + packet);
             }
             messageHandlerExecutor.execute(() -> session.dispose(packet));
-            packet = new MsgPacket();
-            packet.setDataLength(-1);
+            reset();
         }
         return flag;
     }
