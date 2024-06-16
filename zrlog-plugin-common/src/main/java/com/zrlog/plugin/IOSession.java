@@ -19,6 +19,7 @@ import java.nio.channels.Channel;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -239,7 +240,11 @@ public class IOSession {
             } catch (InterruptedException e) {
                 LOGGER.log(Level.SEVERE, "", e);
             }
-            MsgPacket msgPacket = pipeMap.get(msgId).getResponseMsgPacket();
+            PipeInfo pipeInfo = pipeMap.get(msgId);
+            if (Objects.isNull(pipeInfo)) {
+                return null;
+            }
+            MsgPacket msgPacket = pipeInfo.getResponseMsgPacket();
             if (msgPacket != null) {
                 return msgPacket;
             }
