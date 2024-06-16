@@ -47,6 +47,8 @@ public class MsgPacketDispose {
             actionHandler.getBlogRuntimePath(session, msgPacket);
         } else if (action == ActionType.CREATE_ARTICLE) {
             actionHandler.createArticle(session, msgPacket);
+        } else if (action == ActionType.REFRESH_CACHE) {
+            actionHandler.refreshCache(session, msgPacket);
         } else {
             LOGGER.log(Level.WARNING, "UnSupport Method " + action);
         }
