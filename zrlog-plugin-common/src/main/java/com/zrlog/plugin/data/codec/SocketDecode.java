@@ -92,10 +92,25 @@ public class SocketDecode {
             if (RunConstants.runType == RunType.DEV) {
                 LOGGER.info("recv <<< " + session.getAttr().get("count") + " " + packet);
             }
-            messageHandlerExecutor.execute(() -> session.dispose(packet));
+            MsgPacket cpMsgPacket = deepCopyMsg(packet);
+            messageHandlerExecutor.execute(() -> session.dispose(cpMsgPacket));
             reset();
         }
         return flag;
+    }
+
+    private static MsgPacket deepCopyMsg(MsgPacket msgPacket) {
+        MsgPacket packet = new MsgPacket();
+        packet.setMsgId(msgPacket.getMsgId());
+        packet.setStatus(msgPacket.getStatus());
+        //
+        packet.setContentType(msgPacket.getContentType());
+        //data
+        packet.setMethodStr(msgPacket.getMethodStr());
+        packet.setMethodLength(msgPacket.getMethodLength());
+        packet.setDataLength(msgPacket.getDataLength());
+        packet.setData(msgPacket.getData());
+        return packet;
     }
 
 }
