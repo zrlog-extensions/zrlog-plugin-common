@@ -1,7 +1,6 @@
 package com.zrlog.plugin;
 
-import java.io.IOException;
-import java.io.PipedInputStream;
+import java.time.Duration;
 import java.util.*;
 
 public class ClearIdlMsgPacketTimerTask implements Runnable {
@@ -18,35 +17,18 @@ public class ClearIdlMsgPacketTimerTask implements Runnable {
             Set<Integer> removedKeys = new HashSet<>();
             for (Map.Entry<Integer, PipeInfo> entry : pipeMap.entrySet()) {
                 long activeTime = System.currentTimeMillis() - entry.getValue().getCratedAt();
-                if (activeTime > 60000 * 10) {
+                //max wait 6min
+                if (activeTime >= Duration.ofMinutes(6).toMillis()) {
                     removedKeys.add(entry.getKey());
                 }
             }
             for (Integer i : removedKeys) {
-                PipedInputStream pipedIn = pipeMap.get(i).getPipedIn();
-                if (Objects.nonNull(pipedIn)) {
-                    try {
-                        pipedIn.close();
-                    } catch (Exception e) {
-                        //throw new RuntimeException(e);
-                    }
-                }
                 pipeMap.remove(i);
             }
         }
     }
 
     public void removePipeMap(Map<Integer, PipeInfo> pipeMap) {
-        pipeMap.values().forEach(pipeInfo -> {
-            if (Objects.isNull(pipeInfo.getPipedIn())) {
-                return;
-            }
-            try {
-                pipeInfo.getPipedIn().close();
-            } catch (IOException e) {
-                //throw new RuntimeException(e);
-            }
-        });
         pipeMaps.remove(pipeMap);
     }
 
@@ -59,12 +41,7 @@ public class ClearIdlMsgPacketTimerTask implements Runnable {
             if (Objects.isNull(pipeInfo)) {
                 continue;
             }
-            try {
-                pipeInfo.getPipedIn().close();
-                pipeInfoMap.remove(msgId);
-            } catch (IOException e) {
-                //throw new RuntimeException(e);
-            }
+            pipeInfoMap.remove(msgId);
         }
     }
 }

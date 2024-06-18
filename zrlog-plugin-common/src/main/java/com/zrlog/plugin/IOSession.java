@@ -112,7 +112,7 @@ public class IOSession {
         try {
             PipedInputStream in = new PipedInputStream();
             PipedOutputStream out = new PipedOutputStream(in);
-            pipeMap.put(msgPacket.getMsgId(), new PipeInfo(msgPacket, null, in, out, callBack, System.currentTimeMillis()));
+            pipeMap.put(msgPacket.getMsgId(), new PipeInfo(msgPacket, null, callBack, System.currentTimeMillis()));
             socketEncode.doEncode(this, msgPacket);
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "", e);
@@ -173,7 +173,7 @@ public class IOSession {
 
     public <T> T callService(String name, Map map, Class<T> clazz) {
         int messageId = requestService(name, map);
-        return new Gson().fromJson(IOUtil.getStringInputStream(getPipeInByMsgId(messageId)), clazz);
+        return new Gson().fromJson(new String(getResponseMsgPacketByMsgId(messageId).getData().array()), clazz);
     }
 
     public void dispose(MsgPacket msgPacket) {
@@ -183,21 +183,6 @@ public class IOSession {
                 if (pipeInfo != null) {
                     IMsgPacketCallBack callBack = pipeMap.get(msgPacket.getMsgId()).getiMsgPacketCallBack();
                     pipeInfo.setResponseMsgPacket(msgPacket);
-                    //pipe必须异步，不然过大的内容可能导致卡住
-                    new Thread(new Runnable() {
-                        @Override
-                        public void run() {
-                            try (PipedOutputStream outputStream = pipeInfo.getPipedOut()) {
-                                outputStream.write(msgPacket.getData().array());
-                                outputStream.flush();
-                            } catch (IOException e) {
-                                //throw new RuntimeException(e);
-                            } finally {
-                                clearIdlMsgPacketTimerTask.removePipeByMsgId(msgPacket.getMsgId());
-                            }
-                            //System.out.println("callBack = " + callBack);
-                        }
-                    }).start();
                     if (callBack != null) {
                         try {
                             callBack.handler(msgPacket);
@@ -236,14 +221,6 @@ public class IOSession {
         return attr;
     }
 
-    public PipedInputStream getPipeInByMsgId(int msgId) {
-        PipeInfo pipeInfo = pipeMap.get(msgId);
-        if (Objects.isNull(pipeInfo)) {
-            return null;
-        }
-        return pipeInfo.getPipedIn();
-    }
-
     public MsgPacket getRequestMsgPacketByMsgId(int msgId) {
         PipeInfo pipeInfo = pipeMap.get(msgId);
         if (Objects.isNull(pipeInfo)) {
@@ -270,8 +247,12 @@ public class IOSession {
                 }
             }
         } finally {
-            clearIdlMsgPacketTimerTask.removePipeByMsgId(msgId);
+            clearMessageCacheByMsgId(msgId);
         }
+    }
+
+    public void clearMessageCacheByMsgId(int msgId) {
+        clearIdlMsgPacketTimerTask.removePipeByMsgId(msgId);
     }
 }
 
