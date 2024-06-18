@@ -199,7 +199,11 @@ public class IOSession {
                         }
                     }).start();
                     if (callBack != null) {
-                        callBack.handler(msgPacket);
+                        try {
+                            callBack.handler(msgPacket);
+                        } finally {
+                            clearIdlMsgPacketTimerTask.removePipeByMsgId(msgPacket.getMsgId());
+                        }
                         // 不进行多次处理
                         return;
                     }
@@ -208,8 +212,6 @@ public class IOSession {
             msgPacketDispose.handler(this, msgPacket, actionHandler);
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "handle error", e);
-        } finally {
-            clearIdlMsgPacketTimerTask.removePipeByMsgId(msgPacket.getMsgId());
         }
     }
 
@@ -235,11 +237,19 @@ public class IOSession {
     }
 
     public PipedInputStream getPipeInByMsgId(int msgId) {
-        return pipeMap.get(msgId).getPipedIn();
+        PipeInfo pipeInfo = pipeMap.get(msgId);
+        if (Objects.isNull(pipeInfo)) {
+            return null;
+        }
+        return pipeInfo.getPipedIn();
     }
 
     public MsgPacket getRequestMsgPacketByMsgId(int msgId) {
-        return pipeMap.get(msgId).getRequestMsgPackage();
+        PipeInfo pipeInfo = pipeMap.get(msgId);
+        if (Objects.isNull(pipeInfo)) {
+            return null;
+        }
+        return pipeInfo.getRequestMsgPackage();
     }
 
     public MsgPacket getResponseMsgPacketByMsgId(int msgId) {
