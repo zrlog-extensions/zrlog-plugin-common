@@ -89,8 +89,9 @@ public class SocketDecode {
             flag = !packet.getData().hasRemaining();
         }
         if (flag) {
+            session.getReceiveMsgCounter().incrementAndGet();
             if (RunConstants.runType == RunType.DEV) {
-                LOGGER.info("recv <<< " + session.getAttr().get("count") + " " + packet);
+                LOGGER.info("receive <<< " + session.getReceiveMsgCounter().get() + " " + packet);
             }
             MsgPacket cpMsgPacket = deepCopyMsg(packet);
             messageHandlerExecutor.execute(() -> session.dispose(cpMsgPacket));

@@ -37,8 +37,9 @@ public class SocketEncode {
                         throw new EOFException();
                     }
                 }
+                session.getSendMsgCounter().incrementAndGet();
                 if (RunConstants.runType == RunType.DEV) {
-                    LOGGER.info("send >>> " + session.getAttr().get("count") + " " + msgPacket);
+                    LOGGER.info("send >>> " + session.getSendMsgCounter().get() + " " + msgPacket);
                 }
                 channel.register(selector, SelectionKey.OP_READ);
             }

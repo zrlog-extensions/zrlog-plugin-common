@@ -23,7 +23,7 @@ import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -37,7 +37,8 @@ public class IOSession {
     private final Map<String, Object> systemAttr = new ConcurrentHashMap<>();
     private final IActionHandler actionHandler;
     private Plugin plugin;
-    private final AtomicInteger msgCounter = new AtomicInteger();
+    private final AtomicLong sendMsgCounter = new AtomicLong(0);
+    private final AtomicLong receiveMsgCounter = new AtomicLong(0);
     private final MsgPacketDispose msgPacketDispose = new MsgPacketDispose();
     private final IRenderHandler renderHandler;
     private final SocketEncode socketEncode;
@@ -54,10 +55,19 @@ public class IOSession {
         systemAttr.put("_decode", socketCodec.getSocketDecode());
         systemAttr.put("_encode", socketCodec.getSocketEncode());
         systemAttr.put("_actionHandler", actionHandler);
+
         this.socketEncode = socketCodec.getSocketEncode();
         this.actionHandler = actionHandler;
         this.renderHandler = renderHandler;
         clearIdlMsgPacketTimerTask.addTask(pipeMap);
+    }
+
+    public AtomicLong getSendMsgCounter() {
+        return sendMsgCounter;
+    }
+
+    public AtomicLong getReceiveMsgCounter() {
+        return receiveMsgCounter;
     }
 
     public IOSession(SocketChannel channel, Selector selector, SocketCodec socketCodec, IActionHandler actionHandler) {
@@ -103,7 +113,6 @@ public class IOSession {
             PipedInputStream in = new PipedInputStream();
             PipedOutputStream out = new PipedOutputStream(in);
             pipeMap.put(msgPacket.getMsgId(), new PipeInfo(msgPacket, null, in, out, callBack, System.currentTimeMillis()));
-            getAttr().put("count", msgCounter.incrementAndGet());
             socketEncode.doEncode(this, msgPacket);
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "", e);
