@@ -74,22 +74,18 @@ public class IOSession {
 
     public <T> T getResponseSync(ContentType contentType, Object data, ActionType actionType, Class<T> clazz) {
         int msgId = IdUtil.getInt();
-        try {
-            MsgPacketStatus status = MsgPacketStatus.SEND_REQUEST;
-            MsgPacket msgPacket = new MsgPacket(data, contentType, status, msgId, actionType.name());
-            sendMsg(msgPacket);
-            MsgPacket response = getResponseMsgPacketByMsgId(msgId);
-            if (response.getStatus() == MsgPacketStatus.RESPONSE_SUCCESS) {
-                if (response.getContentType() == ContentType.JSON) {
-                    return new JsonConvertMsgBody().toObj(response.getData(), clazz);
-                }
-            } else {
-                throw new RuntimeException("some error");
+        MsgPacketStatus status = MsgPacketStatus.SEND_REQUEST;
+        MsgPacket msgPacket = new MsgPacket(data, contentType, status, msgId, actionType.name());
+        sendMsg(msgPacket);
+        MsgPacket response = getResponseMsgPacketByMsgId(msgId);
+        if (response.getStatus() == MsgPacketStatus.RESPONSE_SUCCESS) {
+            if (response.getContentType() == ContentType.JSON) {
+                return new JsonConvertMsgBody().toObj(response.getData(), clazz);
             }
-            throw new RuntimeException("unSupport response " + response.getContentType());
-        } finally {
-            pipeMap.remove(msgId);
+        } else {
+            throw new RuntimeException("some error");
         }
+        throw new RuntimeException("unSupport response " + response.getContentType());
     }
 
     public void sendMsg(ContentType contentType, Object data, String methodStr, int msgId, MsgPacketStatus status, IMsgPacketCallBack callBack) {
@@ -187,6 +183,8 @@ public class IOSession {
                                 outputStream.flush();
                             } catch (IOException e) {
                                 //throw new RuntimeException(e);
+                            } finally {
+                                clearIdlMsgPacketTimerTask.removePipeByMsgId(msgPacket.getMsgId());
                             }
                             //System.out.println("callBack = " + callBack);
                         }
@@ -234,20 +232,24 @@ public class IOSession {
     }
 
     public MsgPacket getResponseMsgPacketByMsgId(int msgId) {
-        while (true) {
-            try {
-                Thread.sleep(10);
-            } catch (InterruptedException e) {
-                LOGGER.log(Level.SEVERE, "", e);
+        try {
+            while (true) {
+                try {
+                    Thread.sleep(10);
+                } catch (InterruptedException e) {
+                    LOGGER.log(Level.SEVERE, "", e);
+                }
+                PipeInfo pipeInfo = pipeMap.get(msgId);
+                if (Objects.isNull(pipeInfo)) {
+                    return null;
+                }
+                MsgPacket msgPacket = pipeInfo.getResponseMsgPacket();
+                if (msgPacket != null) {
+                    return msgPacket;
+                }
             }
-            PipeInfo pipeInfo = pipeMap.get(msgId);
-            if (Objects.isNull(pipeInfo)) {
-                return null;
-            }
-            MsgPacket msgPacket = pipeInfo.getResponseMsgPacket();
-            if (msgPacket != null) {
-                return msgPacket;
-            }
+        } finally {
+            clearIdlMsgPacketTimerTask.removePipeByMsgId(msgId);
         }
     }
 }
