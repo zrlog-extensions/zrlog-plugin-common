@@ -199,6 +199,8 @@ public class IOSession {
             msgPacketDispose.handler(this, msgPacket, actionHandler);
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "handle error", e);
+        } finally {
+            clearIdlMsgPacketTimerTask.removePipeByMsgId(msgPacket.getMsgId());
         }
     }
 
