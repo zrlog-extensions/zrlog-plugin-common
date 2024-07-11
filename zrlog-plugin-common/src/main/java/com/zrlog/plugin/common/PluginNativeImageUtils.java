@@ -2,8 +2,10 @@ package com.zrlog.plugin.common;
 
 import com.google.gson.Gson;
 import com.zrlog.plugin.IOSession;
+import com.zrlog.plugin.common.bucket.BucketVO;
 import com.zrlog.plugin.common.model.*;
 import com.zrlog.plugin.common.response.UploadFileResponseEntry;
+import com.zrlog.plugin.common.vo.UploadFile;
 import com.zrlog.plugin.data.codec.FileDesc;
 import com.zrlog.plugin.data.codec.HttpRequestInfo;
 import com.zrlog.plugin.data.codec.MsgPacket;
@@ -72,5 +74,7 @@ public class PluginNativeImageUtils {
         new Gson().toJson(new TemplatePath());
         new Gson().toJson(new UploadFileResponseEntry());
         new Gson().toJson(new User());
+        new Gson().toJson(new BucketVO("","","",""));
+        new Gson().toJson(new UploadFile());
     }
 }
