@@ -75,6 +75,6 @@ public class PluginNativeImageUtils {
         new Gson().toJson(new UploadFileResponseEntry());
         new Gson().toJson(new User());
         new Gson().toJson(new BucketVO("","","",""));
-        new Gson().toJson(new UploadFile());
+        //new Gson().toJson(new UploadFile());
     }
 }
