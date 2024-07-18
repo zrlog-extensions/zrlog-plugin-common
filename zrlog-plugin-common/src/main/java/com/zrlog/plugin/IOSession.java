@@ -12,7 +12,6 @@ import com.zrlog.plugin.render.IRenderHandler;
 import com.zrlog.plugin.type.ActionType;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.nio.channels.Channel;
@@ -88,6 +87,9 @@ public class IOSession {
         MsgPacket msgPacket = new MsgPacket(data, contentType, status, msgId, actionType.name());
         sendMsg(msgPacket);
         MsgPacket response = getResponseMsgPacketByMsgId(msgId);
+        if (Objects.isNull(response)) {
+            return null;
+        }
         if (response.getStatus() == MsgPacketStatus.RESPONSE_SUCCESS) {
             if (response.getContentType() == ContentType.JSON) {
                 return new JsonConvertMsgBody().toObj(response.getData(), clazz);
