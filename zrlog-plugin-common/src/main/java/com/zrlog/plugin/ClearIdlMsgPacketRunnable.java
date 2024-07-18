@@ -3,7 +3,7 @@ package com.zrlog.plugin;
 import java.time.Duration;
 import java.util.*;
 
-public class ClearIdlMsgPacketTimerTask implements Runnable {
+class ClearIdlMsgPacketRunnable implements Runnable {
 
     private final List<Map<Integer, PipeInfo>> pipeMaps = new ArrayList<>();
 

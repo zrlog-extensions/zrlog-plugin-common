@@ -19,13 +19,14 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class IOSession {
-
 
     private static final Logger LOGGER = LoggerUtil.getLogger(IOSession.class);
 
@@ -39,12 +40,9 @@ public class IOSession {
     private final MsgPacketDispose msgPacketDispose = new MsgPacketDispose();
     private final IRenderHandler renderHandler;
     private final SocketEncode socketEncode;
-
-    private static final ClearIdlMsgPacketTimerTask clearIdlMsgPacketTimerTask = new ClearIdlMsgPacketTimerTask();
-
-    static {
-        Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(clearIdlMsgPacketTimerTask, 0, 1, TimeUnit.SECONDS);
-    }
+    private static final ReentrantLock lock = new ReentrantLock();
+    private static ClearIdlMsgPacketRunnable clearIdlMsgPacketRunnable;
+    private static ScheduledExecutorService executor;
 
     public IOSession(SocketChannel channel, Selector selector, SocketCodec socketCodec, IActionHandler actionHandler, IRenderHandler renderHandler) {
         systemAttr.put("_channel", channel);
@@ -56,7 +54,17 @@ public class IOSession {
         this.socketEncode = socketCodec.getSocketEncode();
         this.actionHandler = actionHandler;
         this.renderHandler = renderHandler;
-        clearIdlMsgPacketTimerTask.addTask(pipeMap);
+        lock.lock();
+        try {
+            if (Objects.isNull(executor)) {
+                executor = Executors.newSingleThreadScheduledExecutor();
+                clearIdlMsgPacketRunnable = new ClearIdlMsgPacketRunnable();
+                executor.scheduleAtFixedRate(clearIdlMsgPacketRunnable, 0, 1, TimeUnit.SECONDS);
+            }
+        } finally {
+            lock.unlock();
+        }
+        clearIdlMsgPacketRunnable.addTask(pipeMap);
     }
 
     public AtomicLong getSendMsgCounter() {
@@ -185,7 +193,7 @@ public class IOSession {
                         try {
                             callBack.handler(msgPacket);
                         } finally {
-                            clearIdlMsgPacketTimerTask.removePipeByMsgId(msgPacket.getMsgId());
+                            clearIdlMsgPacketRunnable.removePipeByMsgId(msgPacket.getMsgId());
                         }
                         // 不进行多次处理
                         return;
@@ -201,7 +209,7 @@ public class IOSession {
     public void close() {
         try {
             ((Channel) systemAttr.get("_channel")).close();
-            clearIdlMsgPacketTimerTask.removePipeMap(pipeMap);
+            clearIdlMsgPacketRunnable.removePipeMap(pipeMap);
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "", e);
         }
@@ -250,7 +258,7 @@ public class IOSession {
     }
 
     public void clearMessageCacheByMsgId(int msgId) {
-        clearIdlMsgPacketTimerTask.removePipeByMsgId(msgId);
+        clearIdlMsgPacketRunnable.removePipeByMsgId(msgId);
     }
 }
 
