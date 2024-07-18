@@ -143,7 +143,7 @@ public class NioClient {
                             if (channel.isConnectionPending()) {
                                 channel.finishConnect();
                             }
-                            socketDecode = new SocketDecode(Executors.newFixedThreadPool(4));
+                            socketDecode = new SocketDecode(Executors.newVirtualThreadPerTaskExecutor());
                             session = new IOSession(channel, selector, new SocketCodec(new SocketEncode(), socketDecode), actionHandler, renderHandler);
                             session.setPlugin(plugin);
                             session.getAttr().put("_actionClassList", classList);
