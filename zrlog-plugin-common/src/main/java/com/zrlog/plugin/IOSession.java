@@ -12,8 +12,6 @@ import com.zrlog.plugin.render.IRenderHandler;
 import com.zrlog.plugin.type.ActionType;
 
 import java.io.File;
-import java.io.PipedInputStream;
-import java.io.PipedOutputStream;
 import java.nio.channels.Channel;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
@@ -112,8 +110,6 @@ public class IOSession {
 
     public void sendMsg(MsgPacket msgPacket, IMsgPacketCallBack callBack) {
         try {
-            PipedInputStream in = new PipedInputStream();
-            PipedOutputStream out = new PipedOutputStream(in);
             pipeMap.put(msgPacket.getMsgId(), new PipeInfo(msgPacket, null, callBack, System.currentTimeMillis()));
             socketEncode.doEncode(this, msgPacket);
         } catch (Exception e) {
