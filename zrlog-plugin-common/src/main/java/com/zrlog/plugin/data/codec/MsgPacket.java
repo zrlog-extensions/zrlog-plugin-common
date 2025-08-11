@@ -36,7 +36,7 @@ public class MsgPacket {
             return new ByteConvertMsgBody();
         } else if (contentType == ContentType.JSON) {
             return new JsonConvertMsgBody();
-        } else if (contentType == ContentType.HTML || contentType == ContentType.XML) {
+        } else if (contentType == ContentType.HTML || contentType == ContentType.XML || contentType == ContentType.IMAGE_SVG_XML) {
             return new StringConvertMsgBody();
         } else if (contentType == ContentType.FILE) {
             return new FileConvertMsgBody();
