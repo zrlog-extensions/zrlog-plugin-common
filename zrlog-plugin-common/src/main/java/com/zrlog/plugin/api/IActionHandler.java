@@ -36,4 +36,6 @@ public interface IActionHandler {
     void createArticle(final IOSession session, final MsgPacket msgPacket);
 
     void refreshCache(final IOSession session, final MsgPacket msgPacket);
+
+    void articleVisitViewCountAddOne(final IOSession session, final MsgPacket msgPacket);
 }

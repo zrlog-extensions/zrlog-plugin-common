@@ -13,7 +13,8 @@ public enum ActionType {
     GET_DB_PROPERTIES(1, "读取程序数据库配置文件"),
     HTTP_ATTACHMENT_FILE(0, "响应HTTP附件"), LOAD_PUBLIC_INFO(0, "读取程序公开信息"),
     CURRENT_TEMPLATE(1, ""), BLOG_RUN_TIME(1, ""), CREATE_ARTICLE(1, "创建文章"),
-    REFRESH_CACHE(1, "更新缓存");
+    REFRESH_CACHE(1, "更新缓存"),
+    ARTICLE_VISIT_COUNT_ADD_ONE(1, "文章浏览量增加 1");
 
     private final int level;
     private final String desc;

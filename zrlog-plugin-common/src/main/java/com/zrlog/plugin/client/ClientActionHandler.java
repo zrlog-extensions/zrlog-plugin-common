@@ -178,4 +178,9 @@ public class ClientActionHandler implements IActionHandler {
     public void refreshCache(IOSession session, MsgPacket msgPacket) {
 
     }
+
+    @Override
+    public void articleVisitViewCountAddOne(IOSession session, MsgPacket msgPacket) {
+
+    }
 }
