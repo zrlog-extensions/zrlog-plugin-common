@@ -36,6 +36,9 @@ public class HttpClientUtils {
         if (httpResponseInfo.getStatusCode() != 200) {
             throw new RuntimeException("Error send http request, status code:" + httpResponseInfo.getStatusCode() + " body => " + new String(httpResponseInfo.getResponseBody()));
         }
+        if (clazz.getName().equals(String.class.getName())) {
+            return (T) new String(httpResponseInfo.getResponseBody());
+        }
         return new Gson().fromJson(new String(httpResponseInfo.getResponseBody()), clazz);
     }
 }
