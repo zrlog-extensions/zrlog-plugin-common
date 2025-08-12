@@ -4,7 +4,7 @@
     <groupId>com.hibegin</groupId>
     <artifactId>zrlog-plugin-parent</artifactId>
     <modelVersion>4.0.0</modelVersion>
-    <version>3.2.9</version>
+    <version>3.2.10-SNAPSHOT</version>
     <packaging>pom</packaging>
     <description>ZrLog plugin core</description>
     <name>ZrLog plugin core</name>
@@ -160,12 +160,12 @@
             <dependency>
                 <groupId>com.hibegin</groupId>
                 <artifactId>zrlog-plugin-common</artifactId>
-                <version>3.2.9</version>
+                <version>3.2.10-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>com.hibegin</groupId>
                 <artifactId>zrlog-plugin-freemarker-render</artifactId>
-                <version>3.2.9</version>
+                <version>3.2.10-SNAPSHOT</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
