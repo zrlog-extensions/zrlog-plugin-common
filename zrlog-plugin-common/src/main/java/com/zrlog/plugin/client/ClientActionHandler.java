@@ -92,6 +92,9 @@ public class ClientActionHandler implements IActionHandler {
 
     @Override
     public void httpMethod(IOSession session, MsgPacket msgPacket) {
+        if (msgPacket.getStatus() == MsgPacketStatus.RESPONSE_SUCCESS || msgPacket.getStatus() == MsgPacketStatus.RESPONSE_ERROR) {
+            return;
+        }
         List<Class> clazzList = (List<Class>) session.getAttr().get("_actionClassList");
         HttpRequestInfo httpRequestInfo = new Gson().fromJson(msgPacket.getDataStr(), HttpRequestInfo.class);
         if (clazzList != null && !clazzList.isEmpty()) {
