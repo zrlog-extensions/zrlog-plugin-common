@@ -9,7 +9,6 @@ public class BaseHttpRequestInfo {
     protected String accessUrl;
     protected Map<String, String> header;
     protected byte[] requestBody;
-    protected Map<String, String[]> param;
     protected HttpMethod httpMethod;
 
     public String getAccessUrl() {
@@ -34,14 +33,6 @@ public class BaseHttpRequestInfo {
 
     public void setRequestBody(byte[] requestBody) {
         this.requestBody = requestBody;
-    }
-
-    public Map<String, String[]> getParam() {
-        return param;
-    }
-
-    public void setParam(Map<String, String[]> param) {
-        this.param = param;
     }
 
     public HttpMethod getHttpMethod() {

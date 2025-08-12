@@ -27,7 +27,7 @@ public class HttpClientUtils {
     public static <T> T sendGetRequest(String url, Class<T> clazz, IOSession ioSession) {
         BaseHttpRequestInfo baseHttpRequestInfo = new BaseHttpRequestInfo();
         baseHttpRequestInfo.setHttpMethod(HttpMethod.GET);
-        baseHttpRequestInfo.setParam(new HashMap<>());
+        baseHttpRequestInfo.setHeader(new HashMap<>());
         baseHttpRequestInfo.setAccessUrl(url);
         HttpResponseInfo httpResponseInfo = sendHttpRequest(baseHttpRequestInfo, ioSession);
         if (Objects.isNull(httpResponseInfo)) {

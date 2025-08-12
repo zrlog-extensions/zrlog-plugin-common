@@ -12,6 +12,15 @@ public class HttpRequestInfo extends BaseHttpRequestInfo {
     private Integer userId;
     private String version;
     private String fullUrl;
+    private Map<String, String[]> param;
+
+    public Map<String, String[]> getParam() {
+        return param;
+    }
+
+    public void setParam(Map<String, String[]> param) {
+        this.param = param;
+    }
 
     public String getUri() {
         return uri;
