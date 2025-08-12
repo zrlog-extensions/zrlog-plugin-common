@@ -20,7 +20,6 @@ public class FreeMarkerUtil {
         }
     }
 
-
     public static String renderToFMByModel(String name, Object model) throws Exception {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         Writer writer = new OutputStreamWriter(out);
@@ -28,11 +27,6 @@ public class FreeMarkerUtil {
         template.getClass().getMethod("process", Object.class, Writer.class).invoke(template, model, writer);
         writer.flush();
         return out.toString();
-    }
-
-
-    public static void init(String basePath) throws Exception {
-        cfg.getClass().getMethod("setDirectoryForTemplateLoading", File.class).invoke(cfg, new File(basePath));
     }
 
     public static void initClassTemplate(String basePath) {
