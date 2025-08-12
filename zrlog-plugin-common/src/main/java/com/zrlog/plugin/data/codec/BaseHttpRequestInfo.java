@@ -7,7 +7,7 @@ import java.util.Map;
 public class BaseHttpRequestInfo {
 
     protected String accessUrl;
-    protected Map header;
+    protected Map<String, String> header;
     protected byte[] requestBody;
     protected Map<String, String[]> param;
     protected HttpMethod httpMethod;
@@ -20,11 +20,11 @@ public class BaseHttpRequestInfo {
         this.accessUrl = accessUrl;
     }
 
-    public Map getHeader() {
+    public Map<String, String> getHeader() {
         return header;
     }
 
-    public void setHeader(Map header) {
+    public void setHeader(Map<String, String> header) {
         this.header = header;
     }
 
