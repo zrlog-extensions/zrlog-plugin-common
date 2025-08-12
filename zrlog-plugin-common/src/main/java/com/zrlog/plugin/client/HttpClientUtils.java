@@ -8,6 +8,8 @@ import com.zrlog.plugin.data.codec.*;
 import com.zrlog.plugin.type.ActionType;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -25,9 +27,19 @@ public class HttpClientUtils {
     }
 
     public static <T> T sendGetRequest(String url, Class<T> clazz, IOSession ioSession) {
+        return sendGetRequest(url, clazz, null, ioSession);
+    }
+
+
+    public static <T> T sendGetRequest(String url, Class<T> clazz, Map<String, String> headerMap, IOSession ioSession) {
         BaseHttpRequestInfo baseHttpRequestInfo = new BaseHttpRequestInfo();
         baseHttpRequestInfo.setHttpMethod(HttpMethod.GET);
-        baseHttpRequestInfo.setHeader(new HashMap<>());
+        if (Objects.isNull(headerMap)) {
+            baseHttpRequestInfo.setHeader(new HashMap<>());
+        } else {
+            baseHttpRequestInfo.setHeader(new LinkedHashMap<>(headerMap));
+        }
+
         baseHttpRequestInfo.setAccessUrl(url);
         HttpResponseInfo httpResponseInfo = sendHttpRequest(baseHttpRequestInfo, ioSession);
         if (Objects.isNull(httpResponseInfo)) {
