@@ -45,7 +45,7 @@ public class PluginNativeImageUtils {
                 constructor = e.getConstructor(IOSession.class, MsgPacket.class, HttpRequestInfo.class);
                 for (Method method : e.getMethods()) {
                     try {
-                        method.invoke(constructor);
+                        method.invoke(constructor.newInstance(null, null, null));
                     } catch (Exception ex) {
                         ex.printStackTrace();
                     }
