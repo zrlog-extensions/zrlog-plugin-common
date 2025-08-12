@@ -5,11 +5,7 @@ import com.zrlog.plugin.IOSession;
 import com.zrlog.plugin.common.bucket.BucketVO;
 import com.zrlog.plugin.common.model.*;
 import com.zrlog.plugin.common.response.UploadFileResponseEntry;
-import com.zrlog.plugin.common.vo.UploadFile;
-import com.zrlog.plugin.data.codec.FileDesc;
-import com.zrlog.plugin.data.codec.HttpRequestInfo;
-import com.zrlog.plugin.data.codec.MsgPacket;
-import com.zrlog.plugin.data.codec.User;
+import com.zrlog.plugin.data.codec.*;
 import com.zrlog.plugin.message.Plugin;
 
 import java.io.File;
@@ -66,6 +62,8 @@ public class PluginNativeImageUtils {
         new Gson().toJson(new TreeMap<>());
         new Gson().fromJson("{}", Map.class);
         new Gson().toJson(new HttpRequestInfo());
+        new Gson().toJson(new BaseHttpRequestInfo());
+        new Gson().toJson(new HttpResponseInfo());
         new Gson().toJson(new Plugin());
         new Gson().toJson(new BlogRunTime());
         new Gson().toJson(new Comment());
@@ -74,7 +72,7 @@ public class PluginNativeImageUtils {
         new Gson().toJson(new TemplatePath());
         new Gson().toJson(new UploadFileResponseEntry());
         new Gson().toJson(new User());
-        new Gson().toJson(new BucketVO("","","",""));
+        new Gson().toJson(new BucketVO("", "", "", ""));
         //new Gson().toJson(new UploadFile());
     }
 }

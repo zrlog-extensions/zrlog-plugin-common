@@ -6,16 +6,12 @@ import java.util.Map;
 /**
  * Created by xiaochun on 2016/2/13.
  */
-public class HttpRequestInfo {
+public class HttpRequestInfo extends BaseHttpRequestInfo {
     private String uri;
-    private Map header;
-    private byte[] requestBody;
-    private Map<String, String[]> param;
     private String userName;
     private Integer userId;
     private String version;
     private String fullUrl;
-    private String accessUrl;
 
     public String getUri() {
         return uri;
@@ -25,29 +21,6 @@ public class HttpRequestInfo {
         this.uri = uri;
     }
 
-    public Map getHeader() {
-        return header;
-    }
-
-    public void setHeader(Map header) {
-        this.header = header;
-    }
-
-    public byte[] getRequestBody() {
-        return requestBody;
-    }
-
-    public void setRequestBody(byte[] requestBody) {
-        this.requestBody = requestBody;
-    }
-
-    public Map<String, String[]> getParam() {
-        return param;
-    }
-
-    public void setParam(Map<String, String[]> param) {
-        this.param = param;
-    }
 
     public Map simpleParam() {
         Map<String, Object> map = new HashMap<>();
@@ -96,11 +69,4 @@ public class HttpRequestInfo {
         this.fullUrl = fullUrl;
     }
 
-    public String getAccessUrl() {
-        return accessUrl;
-    }
-
-    public void setAccessUrl(String accessUrl) {
-        this.accessUrl = accessUrl;
-    }
 }
