@@ -27,42 +27,44 @@ import java.util.logging.Level;
 public class NioClient {
 
 
-    private IConnectHandler connectHandler;
-    private IRenderHandler renderHandler;
-    private IActionHandler actionHandler;
+    private final IConnectHandler connectHandler;
+    private final IRenderHandler renderHandler;
+    private final IActionHandler actionHandler;
 
     public NioClient() {
-
+        this(null);
     }
 
     public NioClient(IActionHandler actionHandler) {
-        this.actionHandler = actionHandler;
+        this(null, null, actionHandler);
     }
 
     public NioClient(IConnectHandler connectHandler, IRenderHandler renderHandler) {
-        this.connectHandler = connectHandler;
-        this.renderHandler = renderHandler;
+        this(connectHandler, renderHandler, null);
     }
-
 
     public NioClient(IConnectHandler connectHandler, IRenderHandler renderHandler, IActionHandler actionHandler) {
         this.connectHandler = connectHandler;
         this.renderHandler = renderHandler;
-        this.actionHandler = actionHandler;
+        if (actionHandler == null) {
+            this.actionHandler = new ClientActionHandler();
+        } else {
+            this.actionHandler = actionHandler;
+        }
     }
 
-    public void connectServer(String[] args, List<Class> classList, Class<? extends IPluginAction> pluginAction) throws IOException {
+    public void connectServer(String[] args, List<Class<?>> classList, Class<? extends IPluginAction> pluginAction) throws IOException {
         connectServer(args, classList, pluginAction, new ArrayList<>());
     }
 
-    public void connectServer(String[] args, List<Class> classList, Class<? extends IPluginAction> pluginAction, Class<? extends IPluginService> service) throws IOException {
+    public void connectServer(String[] args, List<Class<?>> classList, Class<? extends IPluginAction> pluginAction, Class<? extends IPluginService> service) throws IOException {
         List<Class<? extends IPluginService>> serviceList = new ArrayList<>();
         serviceList.add(service);
         connectServer(args, classList, pluginAction, serviceList);
     }
 
-    public void connectServer(String[] args, List<Class> classList, Class<? extends IPluginAction> pluginAction, List<Class<? extends IPluginService>> serviceList) throws IOException {
-        System.setProperty("java.util.logging.SimpleFormatter.format", "%1$tY-%1$tm-%1$td %1$tH:%1$tM:%1$tS %4$s %5$s%6$s%n");
+    public void connectServer(String[] args, List<Class<?>> classList, Class<? extends IPluginAction> pluginAction, List<Class<? extends IPluginService>> serviceList) throws IOException {
+        System.setProperty("java.util.logging.SimpleFormatter.format", "%1$tY-%1$tm-%1$td %1$tH:%1$tM:%1$tS.%1$tL %4$s %5$s%6$s%n");
         Plugin plugin = new Plugin();
         String propertiesPath = "/plugin.properties";
         try (InputStream in = NioClient.class.getResourceAsStream(propertiesPath)) {
@@ -118,10 +120,7 @@ public class NioClient {
         connectServer(serverAddress, classList, plugin, pluginAction, serviceList);
     }
 
-    private void connectServer(InetSocketAddress serverAddress, List<Class> classList, Plugin plugin, Class<? extends IPluginAction> pluginAction, List<Class<? extends IPluginService>> serviceList) {
-        if (actionHandler == null) {
-            actionHandler = new ClientActionHandler();
-        }
+    private void connectServer(InetSocketAddress serverAddress, List<Class<?>> classList, Plugin plugin, Class<? extends IPluginAction> pluginAction, List<Class<? extends IPluginService>> serviceList) {
         try (SocketChannel socketChannel = SocketChannel.open()) {
             socketChannel.configureBlocking(false);
             Selector selector = Selector.open();
