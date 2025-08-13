@@ -1,6 +1,7 @@
 package com.zrlog.plugin.data.codec;
 
 import com.google.gson.Gson;
+import com.zrlog.plugin.common.HexaConversionUtil;
 import com.zrlog.plugin.data.codec.convert.*;
 
 import java.nio.ByteBuffer;
@@ -121,11 +122,17 @@ public class MsgPacket {
     @Override
     public String toString() {
         if (contentType == ContentType.JSON) {
+            String dataStr;
+            if (data.array().length > 512) {
+                dataStr = new String(HexaConversionUtil.subByts(data.array(), 0, 512));
+            } else {
+                dataStr = new String(data.array());
+            }
             return "MsgPacket{" +
                     "contentType=" + contentType +
                     ", status=" + status.name().toLowerCase() +
                     ", methodStr=" + methodStr +
-                    ", data=" + new String(data.array()) +
+                    ", data=" + dataStr +
                     ", dataLength=" + dataLength +
                     '}';
         } else {
@@ -133,7 +140,7 @@ public class MsgPacket {
                     "contentType=" + contentType +
                     ", status=" + status.name().toLowerCase() +
                     ", methodStr=" + methodStr +
-                    ", data= this file" +
+                    ", data=this file" +
                     ", dataLength=" + dataLength +
                     '}';
         }
