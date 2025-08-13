@@ -13,16 +13,16 @@ public class SimpleTemplateRender implements IRenderHandler {
 
     @Override
     public String render(String s, Plugin plugin, Map<String, Object> map) {
-        return render(SimpleTemplateRender.class.getResourceAsStream(s), plugin, map);
+        return render(SimpleTemplateRender.class.getResourceAsStream(s + ".html"), plugin, map);
     }
 
     @Override
     public String render(InputStream inputStream, Plugin plugin, Map<String, Object> map) {
-        Map<String,Object> dataMap = new HashMap<>(map);
-        if(Objects.nonNull(plugin)){
-        Map<String,Object> pluginMap = new Gson().fromJson(new Gson().toJson(plugin),Map.class);
-            pluginMap.forEach((k,v) -> {
-                dataMap.put("_plugin." + k,v);
+        Map<String, Object> dataMap = new HashMap<>(map);
+        if (Objects.nonNull(plugin)) {
+            Map<String, Object> pluginMap = new Gson().fromJson(new Gson().toJson(plugin), Map.class);
+            pluginMap.forEach((k, v) -> {
+                dataMap.put("_plugin." + k, v);
             });
         }
         String renderResult = IOUtil.getStringInputStream(inputStream);
