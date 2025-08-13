@@ -7,6 +7,7 @@ import com.zrlog.plugin.common.type.HttpMethod;
 import com.zrlog.plugin.data.codec.*;
 import com.zrlog.plugin.type.ActionType;
 
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -19,19 +20,19 @@ import java.util.Objects;
  */
 public class HttpClientUtils {
 
-    public static HttpResponseInfo sendHttpRequest(BaseHttpRequestInfo httpRequestInfo, IOSession ioSession) {
+    public static HttpResponseInfo sendHttpRequest(BaseHttpRequestInfo httpRequestInfo, IOSession ioSession, Duration readTimeout) {
         int id = IdUtil.getInt();
         ioSession.sendMsg(ContentType.JSON, httpRequestInfo, ActionType.HTTP_METHOD.name(), id, MsgPacketStatus.SEND_REQUEST);
-        MsgPacket msgPacket = ioSession.getResponseMsgPacketByMsgId(id);
+        MsgPacket msgPacket = ioSession.getResponseMsgPacketByMsgId(id, readTimeout);
         return new Gson().fromJson(new String(msgPacket.getData().array()), HttpResponseInfo.class);
     }
 
-    public static <T> T sendGetRequest(String url, Class<T> clazz, IOSession ioSession) {
-        return sendGetRequest(url, clazz, null, ioSession);
+    public static <T> T sendGetRequest(String url, Class<T> clazz, IOSession ioSession, Duration readTimeout) {
+        return sendGetRequest(url, clazz, null, ioSession, readTimeout);
     }
 
 
-    public static <T> T sendGetRequest(String url, Class<T> clazz, Map<String, String> headerMap, IOSession ioSession) {
+    public static <T> T sendGetRequest(String url, Class<T> clazz, Map<String, String> headerMap, IOSession ioSession, Duration readTimeout) {
         BaseHttpRequestInfo baseHttpRequestInfo = new BaseHttpRequestInfo();
         baseHttpRequestInfo.setHttpMethod(HttpMethod.GET);
         if (Objects.isNull(headerMap)) {
@@ -41,7 +42,7 @@ public class HttpClientUtils {
         }
 
         baseHttpRequestInfo.setAccessUrl(url);
-        HttpResponseInfo httpResponseInfo = sendHttpRequest(baseHttpRequestInfo, ioSession);
+        HttpResponseInfo httpResponseInfo = sendHttpRequest(baseHttpRequestInfo, ioSession, readTimeout);
         if (Objects.isNull(httpResponseInfo)) {
             throw new RuntimeException("Response is null");
         }

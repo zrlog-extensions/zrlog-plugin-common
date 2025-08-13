@@ -2,7 +2,6 @@ package com.zrlog.plugin.render;
 
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.lang.reflect.InvocationTargetException;

@@ -15,6 +15,7 @@ import java.io.File;
 import java.nio.channels.Channel;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
+import java.time.Duration;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
@@ -236,13 +237,23 @@ public class IOSession {
     }
 
     public MsgPacket getResponseMsgPacketByMsgId(int msgId) {
+        return getResponseMsgPacketByMsgId(msgId, Duration.ofDays(2));
+    }
+
+    public MsgPacket getResponseMsgPacketByMsgId(int msgId, Duration readTimeout) {
+        long timeout = readTimeout.toMillis();
         try {
+            int sleepSeek = 10;
             while (true) {
+                if (timeout <= 0) {
+                    return null;
+                }
                 try {
-                    Thread.sleep(10);
+                    Thread.sleep(sleepSeek);
                 } catch (InterruptedException e) {
                     LOGGER.log(Level.SEVERE, "", e);
                 }
+                timeout -= sleepSeek;
                 PipeInfo pipeInfo = pipeMap.get(msgId);
                 if (Objects.isNull(pipeInfo)) {
                     return null;
