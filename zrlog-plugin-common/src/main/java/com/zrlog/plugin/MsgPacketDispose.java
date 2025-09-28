@@ -51,6 +51,8 @@ public class MsgPacketDispose {
             actionHandler.refreshCache(session, msgPacket);
         } else if (action == ActionType.ARTICLE_VISIT_COUNT_ADD_ONE) {
             actionHandler.articleVisitViewCountAddOne(session, msgPacket);
+        } else if (action == ActionType.LIST_COMMENT) {
+            actionHandler.listComment(session, msgPacket);
         } else {
             LOGGER.log(Level.WARNING, "UnSupport Method " + action);
         }

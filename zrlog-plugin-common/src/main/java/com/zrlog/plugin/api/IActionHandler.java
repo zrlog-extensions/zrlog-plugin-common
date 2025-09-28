@@ -38,4 +38,7 @@ public interface IActionHandler {
     void refreshCache(final IOSession session, final MsgPacket msgPacket);
 
     void articleVisitViewCountAddOne(final IOSession session, final MsgPacket msgPacket);
+
+    default void listComment(final IOSession session, final MsgPacket msgPacket) {
+    }
 }
