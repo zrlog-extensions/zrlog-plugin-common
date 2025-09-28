@@ -5,6 +5,7 @@ public class PublicInfo {
     private String secondTitle;
     private String homeUrl;
     private String apiHomeUrl;
+    private String apiAdminUrl;
     private String adminColorPrimary;
     private Boolean darkMode;
 
@@ -54,5 +55,13 @@ public class PublicInfo {
 
     public void setApiHomeUrl(String apiHomeUrl) {
         this.apiHomeUrl = apiHomeUrl;
+    }
+
+    public String getApiAdminUrl() {
+        return apiAdminUrl;
+    }
+
+    public void setApiAdminUrl(String apiAdminUrl) {
+        this.apiAdminUrl = apiAdminUrl;
     }
 }
