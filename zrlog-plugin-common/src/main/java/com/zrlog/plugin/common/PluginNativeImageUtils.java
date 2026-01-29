@@ -5,6 +5,7 @@ import com.zrlog.plugin.IOSession;
 import com.zrlog.plugin.common.bucket.BucketVO;
 import com.zrlog.plugin.common.model.*;
 import com.zrlog.plugin.common.response.UploadFileResponseEntry;
+import com.zrlog.plugin.common.vo.UploadFile;
 import com.zrlog.plugin.data.codec.*;
 import com.zrlog.plugin.message.Plugin;
 
@@ -13,7 +14,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
 
 public class PluginNativeImageUtils {
 
@@ -56,23 +59,22 @@ public class PluginNativeImageUtils {
         });
     }
 
+    public static void gsonNativeAgentByClazz(List<Class<?>> cls) {
+        Gson gson = new Gson();
+        for (Class<?> cl : cls) {
+            try {
+                Class<?> clazz = Class.forName(cl.getName());
+                Object o = gson.fromJson("{}", clazz);
+                gson.toJson(o);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
     public static void usedGsonObject() {
-        new Gson().toJson(new FileDesc());
-        new Gson().toJson(new HashMap<>());
-        new Gson().toJson(new TreeMap<>());
-        new Gson().fromJson("{}", Map.class);
-        new Gson().toJson(new HttpRequestInfo());
-        new Gson().toJson(new BaseHttpRequestInfo());
-        new Gson().toJson(new HttpResponseInfo());
-        new Gson().toJson(new Plugin());
-        new Gson().toJson(new BlogRunTime());
-        new Gson().toJson(new Comment());
-        new Gson().toJson(new CreateArticleRequest());
-        new Gson().toJson(new PublicInfo());
-        new Gson().toJson(new TemplatePath());
-        new Gson().toJson(new UploadFileResponseEntry());
-        new Gson().toJson(new User());
-        new Gson().toJson(new BucketVO("", "", "", ""));
-        //new Gson().toJson(new UploadFile());
+        gsonNativeAgentByClazz(Arrays.asList(FileDesc.class, HttpRequestInfo.class, BaseHttpRequestInfo.class, HttpResponseInfo.class,
+                Plugin.class, BlogRunTime.class, Comment.class, CreateArticleRequest.class, PublicInfo.class,
+                TemplatePath.class, UploadFileResponseEntry.class, User.class, BucketVO.class, UploadFile.class));
     }
 }

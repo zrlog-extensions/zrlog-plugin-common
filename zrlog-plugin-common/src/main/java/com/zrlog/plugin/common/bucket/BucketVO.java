@@ -7,6 +7,9 @@ public class BucketVO {
     private String secretKey;
     private String host;
 
+    public BucketVO() {
+    }
+
     public BucketVO(String bucketName, String accessKey, String secretKey,
                     String host) {
         this.bucketName = bucketName;
