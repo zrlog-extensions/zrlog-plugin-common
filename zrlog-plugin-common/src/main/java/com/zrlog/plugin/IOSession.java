@@ -219,6 +219,7 @@ public class IOSession {
                         // 不进行多次处理
                         return;
                     }
+                    return;
                 }
             }
             msgPacketDispose.handler(this, msgPacket, actionHandler);

@@ -3,6 +3,7 @@ package com.zrlog.plugin;
 import com.zrlog.plugin.api.IActionHandler;
 import com.zrlog.plugin.common.LoggerUtil;
 import com.zrlog.plugin.data.codec.MsgPacket;
+import com.zrlog.plugin.data.codec.MsgPacketStatus;
 import com.zrlog.plugin.type.ActionType;
 
 import java.util.logging.Level;
@@ -16,6 +17,9 @@ public class MsgPacketDispose {
     private static final Logger LOGGER = LoggerUtil.getLogger(MsgPacketDispose.class);
 
     public void handler(final IOSession session, final MsgPacket msgPacket, IActionHandler actionHandler) {
+        if (msgPacket.getStatus() == MsgPacketStatus.RESPONSE_SUCCESS || msgPacket.getStatus() == MsgPacketStatus.RESPONSE_ERROR) {
+            return;
+        }
         ActionType action = ActionType.valueOf(msgPacket.getMethodStr());
         if (action == ActionType.INIT_CONNECT) {
             actionHandler.initConnect(session, msgPacket);
