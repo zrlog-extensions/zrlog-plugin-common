@@ -11,6 +11,7 @@ import com.zrlog.plugin.data.codec.SocketCodec;
 import com.zrlog.plugin.data.codec.SocketDecode;
 import com.zrlog.plugin.data.codec.SocketEncode;
 import com.zrlog.plugin.message.Plugin;
+import com.zrlog.plugin.message.PluginCapability;
 import com.zrlog.plugin.render.IRenderHandler;
 import com.zrlog.plugin.type.ActionType;
 
@@ -103,6 +104,7 @@ public class NioClient {
                     throw new RuntimeException("forget add @Service in the Class " + serviceClass);
                 }
                 plugin.getServices().add(service.value());
+                plugin.getCapabilities().addAll(readCapabilities(serviceClass));
             }
         }
         //parse args
@@ -115,6 +117,9 @@ public class NioClient {
         }
         if (Objects.isNull(plugin.getId())) {
             plugin.setId(UUID.randomUUID().toString());
+        }
+        for (PluginCapability capability : plugin.getCapabilities()) {
+            fillPluginInfo(plugin, capability);
         }
         InetSocketAddress serverAddress = new InetSocketAddress("127.0.0.1", serverPort);
         connectServer(serverAddress, classList, plugin, pluginAction, serviceList);
@@ -170,6 +175,65 @@ public class NioClient {
             }
         } catch (Exception e) {
             exitPlugin(e);
+        }
+    }
+
+    private List<PluginCapability> readCapabilities(Class<? extends IPluginService> serviceClass) {
+        List<PluginCapability> capabilities = new ArrayList<>();
+        Capability capability = serviceClass.getAnnotation(Capability.class);
+        ScheduledCapability scheduledCapability = serviceClass.getAnnotation(ScheduledCapability.class);
+        if (scheduledCapability != null) {
+            if (capability != null && !capability.key().equals(scheduledCapability.key())) {
+                throw new RuntimeException("@Capability key must equal @ScheduledCapability key in " + serviceClass);
+            }
+            capabilities.add(fromScheduledCapability(scheduledCapability, capability));
+        } else if (capability != null) {
+            capabilities.add(fromCapability(capability));
+        }
+        return capabilities;
+    }
+
+    private PluginCapability fromCapability(Capability capability) {
+        PluginCapability pluginCapability = new PluginCapability();
+        pluginCapability.setKey(capability.key());
+        pluginCapability.setType(capability.type());
+        pluginCapability.setLabel(capability.label());
+        pluginCapability.setDescription(capability.description());
+        pluginCapability.setExposure(Arrays.asList(capability.exposure()));
+        pluginCapability.setRiskLevel(capability.riskLevel());
+        pluginCapability.setReadOnly(capability.readOnly());
+        pluginCapability.setRequiresConfirmation(capability.requiresConfirmation());
+        pluginCapability.setTimeoutSeconds(capability.timeoutSeconds());
+        pluginCapability.setConcurrency(capability.concurrency());
+        pluginCapability.setEnabled(Boolean.TRUE);
+        pluginCapability.setChannel(capability.channel());
+        return pluginCapability;
+    }
+
+    private PluginCapability fromScheduledCapability(ScheduledCapability scheduledCapability, Capability capability) {
+        PluginCapability pluginCapability = new PluginCapability();
+        pluginCapability.setKey(scheduledCapability.key());
+        pluginCapability.setType("scheduled");
+        pluginCapability.setLabel(scheduledCapability.label());
+        pluginCapability.setDescription(scheduledCapability.description());
+        pluginCapability.setExposure(Collections.singletonList("scheduler"));
+        pluginCapability.setRiskLevel(capability == null ? "low" : capability.riskLevel());
+        pluginCapability.setReadOnly(capability == null ? Boolean.FALSE : capability.readOnly());
+        pluginCapability.setRequiresConfirmation(capability == null ? Boolean.FALSE : capability.requiresConfirmation());
+        pluginCapability.setTimeoutSeconds(scheduledCapability.timeoutSeconds());
+        pluginCapability.setConcurrency(scheduledCapability.concurrency());
+        pluginCapability.setEnabled(Boolean.TRUE);
+        pluginCapability.setDefaultCron(scheduledCapability.defaultCron());
+        pluginCapability.setTimezone(scheduledCapability.timezone());
+        return pluginCapability;
+    }
+
+    private void fillPluginInfo(Plugin plugin, PluginCapability capability) {
+        if (capability.getPluginId() == null) {
+            capability.setPluginId(plugin.getId());
+        }
+        if (capability.getPluginName() == null) {
+            capability.setPluginName(plugin.getShortName());
         }
     }
 

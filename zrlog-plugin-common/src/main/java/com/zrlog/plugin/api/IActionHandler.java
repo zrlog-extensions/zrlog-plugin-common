@@ -41,4 +41,10 @@ public interface IActionHandler {
 
     default void listComment(final IOSession session, final MsgPacket msgPacket) {
     }
+
+    default void capabilityInvoke(final IOSession session, final MsgPacket msgPacket) {
+    }
+
+    default void notificationPublish(final IOSession session, final MsgPacket msgPacket) {
+    }
 }

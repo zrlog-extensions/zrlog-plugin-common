@@ -53,9 +53,12 @@ public class MsgPacketDispose {
             actionHandler.articleVisitViewCountAddOne(session, msgPacket);
         } else if (action == ActionType.LIST_COMMENT) {
             actionHandler.listComment(session, msgPacket);
+        } else if (action == ActionType.CAPABILITY_INVOKE) {
+            actionHandler.capabilityInvoke(session, msgPacket);
+        } else if (action == ActionType.NOTIFICATION_PUBLISH) {
+            actionHandler.notificationPublish(session, msgPacket);
         } else {
             LOGGER.log(Level.WARNING, "UnSupport Method " + action);
         }
     }
 }
-

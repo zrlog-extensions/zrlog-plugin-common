@@ -7,6 +7,8 @@ import com.zrlog.plugin.common.IdUtil;
 import com.zrlog.plugin.common.LoggerUtil;
 import com.zrlog.plugin.data.codec.*;
 import com.zrlog.plugin.data.codec.convert.JsonConvertMsgBody;
+import com.zrlog.plugin.message.CapabilityInvokeRequest;
+import com.zrlog.plugin.message.NotificationRequest;
 import com.zrlog.plugin.message.Plugin;
 import com.zrlog.plugin.render.IRenderHandler;
 import com.zrlog.plugin.type.ActionType;
@@ -174,6 +176,24 @@ public class IOSession {
         return msgId;
     }
 
+    public int requestCapability(String pluginId, String capabilityKey, Map<String, Object> payload, IMsgPacketCallBack msgPacketCallBack) {
+        int msgId = IdUtil.getInt();
+        CapabilityInvokeRequest request = new CapabilityInvokeRequest();
+        request.setPluginId(pluginId);
+        request.setCapabilityKey(capabilityKey);
+        request.setPayload(payload);
+        MsgPacket msgPacket = new MsgPacket(request, ContentType.JSON, MsgPacketStatus.SEND_REQUEST, msgId, ActionType.CAPABILITY_INVOKE.name());
+        sendMsg(msgPacket, msgPacketCallBack);
+        return msgId;
+    }
+
+    public int publishNotification(NotificationRequest request, IMsgPacketCallBack msgPacketCallBack) {
+        int msgId = IdUtil.getInt();
+        MsgPacket msgPacket = new MsgPacket(request, ContentType.JSON, MsgPacketStatus.SEND_REQUEST, msgId, ActionType.NOTIFICATION_PUBLISH.name());
+        sendMsg(msgPacket, msgPacketCallBack);
+        return msgId;
+    }
+
     public int requestService(String name, Map map) {
         return requestService(name, map, null);
     }
@@ -272,4 +292,3 @@ public class IOSession {
         clearIdlMsgPacketRunnable.removePipeByMsgId(msgId);
     }
 }
-

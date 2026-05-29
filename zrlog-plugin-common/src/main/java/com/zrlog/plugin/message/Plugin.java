@@ -1,6 +1,8 @@
 package com.zrlog.plugin.message;
 
+import java.util.ArrayList;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -20,6 +22,7 @@ public class Plugin {
     private String previewImageBase64;
     private Set<String> services = new LinkedHashSet<>();
     private Set<String> dependentService = new LinkedHashSet<>();
+    private List<PluginCapability> capabilities = new ArrayList<>();
 
     public String getVersion() {
         return version;
@@ -115,5 +118,13 @@ public class Plugin {
 
     public void setPreviewImageBase64(String previewImageBase64) {
         this.previewImageBase64 = previewImageBase64;
+    }
+
+    public List<PluginCapability> getCapabilities() {
+        return capabilities;
+    }
+
+    public void setCapabilities(List<PluginCapability> capabilities) {
+        this.capabilities = capabilities;
     }
 }

@@ -10,6 +10,8 @@ import com.zrlog.plugin.data.codec.ContentType;
 import com.zrlog.plugin.data.codec.HttpRequestInfo;
 import com.zrlog.plugin.data.codec.MsgPacket;
 import com.zrlog.plugin.data.codec.MsgPacketStatus;
+import com.zrlog.plugin.message.CapabilityInvokeRequest;
+import com.zrlog.plugin.message.CapabilityInvokeResult;
 import com.zrlog.plugin.type.ActionType;
 import com.zrlog.plugin.type.RunType;
 
@@ -34,21 +36,41 @@ public class ClientActionHandler implements IActionHandler {
 
     @Override
     public void service(IOSession session, MsgPacket msgPacket) {
+        String serviceName = null;
+        if (msgPacket.getContentType() == ContentType.JSON) {
+            Map<String, Object> map = new Gson().fromJson(msgPacket.getDataStr(), Map.class);
+            serviceName = (String) map.get("name");
+        }
+        if (!handleServiceByName(session, msgPacket, serviceName)) {
+            session.sendJsonMsg(new HashMap<>(), msgPacket.getMethodStr(), msgPacket.getMsgId(), MsgPacketStatus.RESPONSE_ERROR);
+        }
+    }
+
+    @Override
+    public void capabilityInvoke(IOSession session, MsgPacket msgPacket) {
+        CapabilityInvokeRequest request = new Gson().fromJson(msgPacket.getDataStr(), CapabilityInvokeRequest.class);
+        if (!handleServiceByName(session, msgPacket, request.getCapabilityKey())) {
+            CapabilityInvokeResult result = new CapabilityInvokeResult();
+            result.setSuccess(false);
+            result.setErrorMessage("Capability not found: " + request.getCapabilityKey());
+            session.sendJsonMsg(result, msgPacket.getMethodStr(), msgPacket.getMsgId(), MsgPacketStatus.RESPONSE_ERROR);
+        }
+    }
+
+    private boolean handleServiceByName(IOSession session, MsgPacket msgPacket, String name) {
         List<Class<? extends IPluginService>> pluginServices = (List<Class<? extends IPluginService>>) session.getAttr().get("_pluginServices");
         if (pluginServices == null || pluginServices.isEmpty()) {
-            session.sendJsonMsg(new HashMap<>(), msgPacket.getMethodStr(), msgPacket.getMsgId(), MsgPacketStatus.RESPONSE_ERROR);
+            return false;
         } else {
             try {
                 if (msgPacket.getContentType() == ContentType.JSON) {
-                    Map<String, Object> map = new Gson().fromJson(msgPacket.getDataStr(), Map.class);
                     for (Class<? extends IPluginService> serviceClass : pluginServices) {
-                        Service service = serviceClass.getAnnotation(Service.class);
-                        if (service != null && service.value().equals(map.get("name"))) {
+                        if (supportServiceName(serviceClass, name)) {
                             serviceClass.newInstance().handle(session, msgPacket);
-                            return;
+                            return true;
                         }
                     }
-                    LOGGER.warning("not support service " + map.get("name"));
+                    LOGGER.warning("not support service " + name);
                 } else {
                     LOGGER.log(Level.SEVERE, "not support the contentType ", msgPacket.getContentType());
                 }
@@ -56,6 +78,20 @@ public class ClientActionHandler implements IActionHandler {
                 LOGGER.log(Level.SEVERE, "handle service method error", e);
             }
         }
+        return false;
+    }
+
+    private boolean supportServiceName(Class<? extends IPluginService> serviceClass, String name) {
+        Service service = serviceClass.getAnnotation(Service.class);
+        if (service != null && service.value().equals(name)) {
+            return true;
+        }
+        Capability capability = serviceClass.getAnnotation(Capability.class);
+        if (capability != null && capability.key().equals(name)) {
+            return true;
+        }
+        ScheduledCapability scheduledCapability = serviceClass.getAnnotation(ScheduledCapability.class);
+        return scheduledCapability != null && scheduledCapability.key().equals(name);
     }
 
     @Override
