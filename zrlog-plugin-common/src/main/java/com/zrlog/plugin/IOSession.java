@@ -121,7 +121,9 @@ public class IOSession {
 
     public void sendMsg(MsgPacket msgPacket, IMsgPacketCallBack callBack) {
         try {
-            pipeMap.put(msgPacket.getMsgId(), new PipeInfo(msgPacket, null, callBack, System.currentTimeMillis()));
+            if (msgPacket.getStatus() == MsgPacketStatus.SEND_REQUEST) {
+                pipeMap.put(msgPacket.getMsgId(), new PipeInfo(msgPacket, null, callBack, System.currentTimeMillis()));
+            }
             socketEncode.doEncode(this, msgPacket);
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "", e);
