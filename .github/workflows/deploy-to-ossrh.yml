@@ -4,6 +4,7 @@ on:
   push:
     tags:
       - 'v*'  # Only run on version tags like v1.2.3
+      - 'main'
 
 jobs:
   release:
