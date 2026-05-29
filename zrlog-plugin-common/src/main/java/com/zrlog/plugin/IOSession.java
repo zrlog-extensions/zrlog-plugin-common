@@ -208,8 +208,24 @@ public class IOSession {
         return msgId;
     }
 
+    public int updateSchedule(String capabilityKey, String cron, Boolean enabled) {
+        return updateSchedule(capabilityKey, cron, enabled, null);
+    }
+
     public int updateSchedule(String capabilityKey, String cron, IMsgPacketCallBack msgPacketCallBack) {
         return updateSchedule(capabilityKey, cron, null, msgPacketCallBack);
+    }
+
+    public int updateSchedule(String capabilityKey, String cron) {
+        return updateSchedule(capabilityKey, cron, null, null);
+    }
+
+    public int updateScheduleEnabled(String capabilityKey, boolean enabled, IMsgPacketCallBack msgPacketCallBack) {
+        return updateSchedule(capabilityKey, null, enabled, msgPacketCallBack);
+    }
+
+    public int updateScheduleEnabled(String capabilityKey, boolean enabled) {
+        return updateScheduleEnabled(capabilityKey, enabled, null);
     }
 
     public int requestService(String name, Map map) {
