@@ -12,6 +12,8 @@ import com.zrlog.plugin.message.CapabilityInvokeResult;
 import com.zrlog.plugin.message.NotificationRequest;
 import com.zrlog.plugin.message.Plugin;
 import com.zrlog.plugin.message.PluginCapability;
+import com.zrlog.plugin.message.SchedulerUpdateRequest;
+import com.zrlog.plugin.message.SchedulerUpdateResult;
 
 import java.io.File;
 import java.io.IOException;
@@ -80,6 +82,7 @@ public class PluginNativeImageUtils {
         gsonNativeAgentByClazz(Arrays.asList(FileDesc.class, HttpRequestInfo.class, BaseHttpRequestInfo.class, HttpResponseInfo.class,
                 Plugin.class, BlogRunTime.class, Comment.class, CreateArticleRequest.class, PublicInfo.class,
                 TemplatePath.class, UploadFileResponseEntry.class, User.class, BucketVO.class, UploadFile.class,
-                PluginCapability.class, CapabilityInvokeRequest.class, CapabilityInvokeResult.class, NotificationRequest.class));
+                PluginCapability.class, CapabilityInvokeRequest.class, CapabilityInvokeResult.class, NotificationRequest.class,
+                SchedulerUpdateRequest.class, SchedulerUpdateResult.class));
     }
 }

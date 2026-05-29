@@ -61,6 +61,8 @@ public class MsgPacketDispose {
             actionHandler.capabilityInvoke(session, msgPacket);
         } else if (action == ActionType.NOTIFICATION_PUBLISH) {
             actionHandler.notificationPublish(session, msgPacket);
+        } else if (action == ActionType.SCHEDULER_UPDATE) {
+            actionHandler.schedulerUpdate(session, msgPacket);
         } else {
             LOGGER.log(Level.WARNING, "UnSupport Method " + action);
         }

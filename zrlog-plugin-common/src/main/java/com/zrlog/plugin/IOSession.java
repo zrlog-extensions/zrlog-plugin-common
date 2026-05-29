@@ -10,6 +10,7 @@ import com.zrlog.plugin.data.codec.convert.JsonConvertMsgBody;
 import com.zrlog.plugin.message.CapabilityInvokeRequest;
 import com.zrlog.plugin.message.NotificationRequest;
 import com.zrlog.plugin.message.Plugin;
+import com.zrlog.plugin.message.SchedulerUpdateRequest;
 import com.zrlog.plugin.render.IRenderHandler;
 import com.zrlog.plugin.type.ActionType;
 
@@ -194,6 +195,21 @@ public class IOSession {
         MsgPacket msgPacket = new MsgPacket(request, ContentType.JSON, MsgPacketStatus.SEND_REQUEST, msgId, ActionType.NOTIFICATION_PUBLISH.name());
         sendMsg(msgPacket, msgPacketCallBack);
         return msgId;
+    }
+
+    public int updateSchedule(String capabilityKey, String cron, Boolean enabled, IMsgPacketCallBack msgPacketCallBack) {
+        int msgId = IdUtil.getInt();
+        SchedulerUpdateRequest request = new SchedulerUpdateRequest();
+        request.setCapabilityKey(capabilityKey);
+        request.setCron(cron);
+        request.setEnabled(enabled);
+        MsgPacket msgPacket = new MsgPacket(request, ContentType.JSON, MsgPacketStatus.SEND_REQUEST, msgId, ActionType.SCHEDULER_UPDATE.name());
+        sendMsg(msgPacket, msgPacketCallBack);
+        return msgId;
+    }
+
+    public int updateSchedule(String capabilityKey, String cron, IMsgPacketCallBack msgPacketCallBack) {
+        return updateSchedule(capabilityKey, cron, null, msgPacketCallBack);
     }
 
     public int requestService(String name, Map map) {
