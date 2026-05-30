@@ -6,10 +6,16 @@ import java.util.Map;
 
 public class BaseHttpRequestInfo {
 
+    public static final String DARK_MODE_HEADER = "Dark-Mode";
+    public static final String ADMIN_COLOR_PRIMARY_HEADER = "Admin-Color-Primary";
+    public static final String DEFAULT_ADMIN_COLOR_PRIMARY = "#1677ff";
+
     protected String accessUrl;
     protected Map<String, String> header;
     protected byte[] requestBody;
     protected HttpMethod httpMethod;
+    protected Boolean darkMode;
+    protected String adminColorPrimary;
 
     public String getAccessUrl() {
         return accessUrl;
@@ -41,5 +47,66 @@ public class BaseHttpRequestInfo {
 
     public void setHttpMethod(HttpMethod httpMethod) {
         this.httpMethod = httpMethod;
+    }
+
+    public Boolean getDarkMode() {
+        if (darkMode != null) {
+            return darkMode;
+        }
+        return Boolean.parseBoolean(getHeaderValue(DARK_MODE_HEADER, "Dark_mode", "dark_mode"));
+    }
+
+    public void setDarkMode(Boolean darkMode) {
+        this.darkMode = darkMode;
+    }
+
+    public boolean isDarkMode() {
+        return Boolean.TRUE.equals(getDarkMode());
+    }
+
+    public String getAdminColorPrimary() {
+        String value = adminColorPrimary;
+        if (value == null || value.trim().isEmpty()) {
+            value = getHeaderValue(ADMIN_COLOR_PRIMARY_HEADER, "admin_color_Primary", "admin_color_primary");
+        }
+        if (value == null || value.trim().isEmpty()) {
+            return DEFAULT_ADMIN_COLOR_PRIMARY;
+        }
+        return value;
+    }
+
+    public void setAdminColorPrimary(String adminColorPrimary) {
+        this.adminColorPrimary = adminColorPrimary;
+    }
+
+    private String getHeaderValue(String key, String... aliases) {
+        if (header == null || header.isEmpty()) {
+            return null;
+        }
+        String value = header.get(key);
+        if (value != null && !value.trim().isEmpty()) {
+            return value;
+        }
+        for (String alias : aliases) {
+            value = header.get(alias);
+            if (value != null && !value.trim().isEmpty()) {
+                return value;
+            }
+        }
+        for (Map.Entry<String, String> entry : header.entrySet()) {
+            String entryKey = entry.getKey();
+            if (entryKey == null) {
+                continue;
+            }
+            if (entryKey.equalsIgnoreCase(key)) {
+                return entry.getValue();
+            }
+            for (String alias : aliases) {
+                if (entryKey.equalsIgnoreCase(alias)) {
+                    return entry.getValue();
+                }
+            }
+        }
+        return null;
     }
 }
