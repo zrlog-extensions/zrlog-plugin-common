@@ -180,22 +180,24 @@ public class NioClient {
 
     private List<PluginCapability> readCapabilities(Class<? extends IPluginService> serviceClass) {
         List<PluginCapability> capabilities = new ArrayList<>();
+        Service service = serviceClass.getAnnotation(Service.class);
         Capability capability = serviceClass.getAnnotation(Capability.class);
         ScheduledCapability scheduledCapability = serviceClass.getAnnotation(ScheduledCapability.class);
         if (scheduledCapability != null) {
             if (capability != null && !capability.key().equals(scheduledCapability.key())) {
                 throw new RuntimeException("@Capability key must equal @ScheduledCapability key in " + serviceClass);
             }
-            capabilities.add(fromScheduledCapability(scheduledCapability, capability));
+            capabilities.add(fromScheduledCapability(scheduledCapability, capability, service));
         } else if (capability != null) {
-            capabilities.add(fromCapability(capability));
+            capabilities.add(fromCapability(capability, service));
         }
         return capabilities;
     }
 
-    private PluginCapability fromCapability(Capability capability) {
+    private PluginCapability fromCapability(Capability capability, Service service) {
         PluginCapability pluginCapability = new PluginCapability();
         pluginCapability.setKey(capability.key());
+        pluginCapability.setServiceName(service == null ? null : service.value());
         pluginCapability.setType(capability.type());
         pluginCapability.setLabel(capability.label());
         pluginCapability.setDescription(capability.description());
@@ -210,9 +212,10 @@ public class NioClient {
         return pluginCapability;
     }
 
-    private PluginCapability fromScheduledCapability(ScheduledCapability scheduledCapability, Capability capability) {
+    private PluginCapability fromScheduledCapability(ScheduledCapability scheduledCapability, Capability capability, Service service) {
         PluginCapability pluginCapability = new PluginCapability();
         pluginCapability.setKey(scheduledCapability.key());
+        pluginCapability.setServiceName(service == null ? null : service.value());
         pluginCapability.setType("scheduled");
         pluginCapability.setLabel(scheduledCapability.label());
         pluginCapability.setDescription(scheduledCapability.description());

@@ -8,6 +8,7 @@ public class PluginCapability {
     private String pluginId;
     private String pluginName;
     private String key;
+    private String serviceName;
     private String type;
     private String label;
     private String description;
@@ -46,6 +47,14 @@ public class PluginCapability {
 
     public void setKey(String key) {
         this.key = key;
+    }
+
+    public String getServiceName() {
+        return serviceName;
+    }
+
+    public void setServiceName(String serviceName) {
+        this.serviceName = serviceName;
     }
 
     public String getType() {
