@@ -1,6 +1,7 @@
 package com.zrlog.plugin.client;
 
 import com.zrlog.plugin.IOSession;
+import com.zrlog.plugin.RunConstants;
 import com.zrlog.plugin.api.*;
 import com.zrlog.plugin.common.ConfigKit;
 import com.zrlog.plugin.common.IOUtil;
@@ -14,6 +15,7 @@ import com.zrlog.plugin.message.Plugin;
 import com.zrlog.plugin.message.PluginCapability;
 import com.zrlog.plugin.render.IRenderHandler;
 import com.zrlog.plugin.type.ActionType;
+import com.zrlog.plugin.type.RunType;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -190,6 +192,13 @@ public class NioClient {
             capabilities.add(fromScheduledCapability(scheduledCapability, capability, service));
         } else if (capability != null) {
             capabilities.add(fromCapability(capability, service));
+        }
+        if (RunConstants.runType == RunType.AGENT) {
+            try {
+                serviceClass.getConstructor().newInstance();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
         }
         return capabilities;
     }

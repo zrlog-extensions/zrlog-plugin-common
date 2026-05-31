@@ -6,6 +6,7 @@ import com.zrlog.plugin.RunConstants;
 import com.zrlog.plugin.api.*;
 import com.zrlog.plugin.common.IOUtil;
 import com.zrlog.plugin.common.LoggerUtil;
+import com.zrlog.plugin.common.vo.ServiceInvokeResult;
 import com.zrlog.plugin.data.codec.ContentType;
 import com.zrlog.plugin.data.codec.HttpRequestInfo;
 import com.zrlog.plugin.data.codec.MsgPacket;
@@ -41,7 +42,7 @@ public class ClientActionHandler implements IActionHandler {
             Map<String, Object> map = new Gson().fromJson(msgPacket.getDataStr(), Map.class);
             serviceName = (String) map.get("name");
         }
-        if (!handleServiceByName(session, msgPacket, serviceName)) {
+        if (!handleServiceByName(session, msgPacket, serviceName).isOk()) {
             session.sendJsonMsg(new HashMap<>(), msgPacket.getMethodStr(), msgPacket.getMsgId(), MsgPacketStatus.RESPONSE_ERROR);
         }
     }
@@ -49,36 +50,32 @@ public class ClientActionHandler implements IActionHandler {
     @Override
     public void capabilityInvoke(IOSession session, MsgPacket msgPacket) {
         CapabilityInvokeRequest request = new Gson().fromJson(msgPacket.getDataStr(), CapabilityInvokeRequest.class);
-        if (!handleServiceByName(session, msgPacket, request.getCapabilityKey())) {
-            CapabilityInvokeResult result = new CapabilityInvokeResult();
-            result.setSuccess(false);
-            result.setErrorMessage("Capability not found: " + request.getCapabilityKey());
-            session.sendJsonMsg(result, msgPacket.getMethodStr(), msgPacket.getMsgId(), MsgPacketStatus.RESPONSE_ERROR);
-        }
+        ServiceInvokeResult serviceInvokeResult = handleServiceByName(session, msgPacket, request.getCapabilityKey());
+        CapabilityInvokeResult result = new CapabilityInvokeResult();
+        result.setSuccess(serviceInvokeResult.isOk());
+        result.setErrorMessage(result.getErrorMessage());
+        session.sendJsonMsg(result, msgPacket.getMethodStr(), msgPacket.getMsgId(), MsgPacketStatus.RESPONSE_ERROR);
     }
 
-    private boolean handleServiceByName(IOSession session, MsgPacket msgPacket, String name) {
+    private ServiceInvokeResult handleServiceByName(IOSession session, MsgPacket msgPacket, String name) {
+        if (msgPacket.getContentType() != ContentType.JSON) {
+            return new ServiceInvokeResult(400, "not support service " + name);
+        }
         List<Class<? extends IPluginService>> pluginServices = (List<Class<? extends IPluginService>>) session.getAttr().get("_pluginServices");
         if (pluginServices == null || pluginServices.isEmpty()) {
-            return false;
-        } else {
-            try {
-                if (msgPacket.getContentType() == ContentType.JSON) {
-                    for (Class<? extends IPluginService> serviceClass : pluginServices) {
-                        if (supportServiceName(serviceClass, name)) {
-                            serviceClass.newInstance().handle(session, msgPacket);
-                            return true;
-                        }
-                    }
-                    LOGGER.warning("not support service " + name);
-                } else {
-                    LOGGER.log(Level.SEVERE, "not support the contentType ", msgPacket.getContentType());
-                }
-            } catch (InstantiationException | IllegalAccessException e) {
-                LOGGER.log(Level.SEVERE, "handle service method error", e);
-            }
+            return new ServiceInvokeResult(404, "Service is empty");
         }
-        return false;
+        try {
+            for (Class<? extends IPluginService> serviceClass : pluginServices) {
+                if (supportServiceName(serviceClass, name)) {
+                    serviceClass.newInstance().handle(session, msgPacket);
+                    return new ServiceInvokeResult(0, "");
+                }
+            }
+            return new ServiceInvokeResult(400, "Capability not found: " + name);
+        } catch (Exception e) {
+            return new ServiceInvokeResult(500, "handle service method error " + e.getMessage());
+        }
     }
 
     private boolean supportServiceName(Class<? extends IPluginService> serviceClass, String name) {
