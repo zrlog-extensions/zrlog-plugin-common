@@ -10,6 +10,9 @@ on:
 jobs:
   release:
     runs-on: ubuntu-latest
+    concurrency:
+      group: deploy-on-ubuntu-latest-ossrh   # 同一个 group 的任务会排队执行
+      cancel-in-progress: true # 取消前一个任务
 
     steps:
     - name: Checkout source code
