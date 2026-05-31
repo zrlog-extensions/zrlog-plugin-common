@@ -5,7 +5,6 @@ import com.zrlog.plugin.IOSession;
 import com.zrlog.plugin.common.bucket.BucketVO;
 import com.zrlog.plugin.common.model.*;
 import com.zrlog.plugin.common.response.UploadFileResponseEntry;
-import com.zrlog.plugin.common.vo.UploadFile;
 import com.zrlog.plugin.data.codec.*;
 import com.zrlog.plugin.message.*;
 
@@ -75,7 +74,7 @@ public class PluginNativeImageUtils {
     public static void usedGsonObject() {
         gsonNativeAgentByClazz(Arrays.asList(FileDesc.class, HttpRequestInfo.class, BaseHttpRequestInfo.class, HttpResponseInfo.class,
                 Plugin.class, BlogRunTime.class, Comment.class, CreateArticleRequest.class, PublicInfo.class,
-                TemplatePath.class, UploadFileResponseEntry.class, User.class, BucketVO.class, UploadFile.class,
+                TemplatePath.class, UploadFileResponseEntry.class, User.class, BucketVO.class,
                 PluginCapability.class, CapabilityInvokeRequest.class, CapabilityInvokeResult.class, NotificationRequest.class,
                 SchedulerUpdateRequest.class, SchedulerUpdateResult.class));
     }
