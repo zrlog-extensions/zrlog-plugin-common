@@ -11,7 +11,7 @@ jobs:
   release:
     runs-on: ubuntu-latest
     concurrency:
-      group: deploy-on-ubuntu-latest-ossrh   # 同一个 group 的任务会排队执行
+      group: deploy-on-ubuntu-${{github.ref_name}}-ossrh   # 同一个 group 的任务会排队执行
       cancel-in-progress: true # 取消前一个任务
 
     steps:
