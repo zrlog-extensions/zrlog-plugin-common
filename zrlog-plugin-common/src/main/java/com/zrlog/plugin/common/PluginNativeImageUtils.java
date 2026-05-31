@@ -7,13 +7,7 @@ import com.zrlog.plugin.common.model.*;
 import com.zrlog.plugin.common.response.UploadFileResponseEntry;
 import com.zrlog.plugin.common.vo.UploadFile;
 import com.zrlog.plugin.data.codec.*;
-import com.zrlog.plugin.message.CapabilityInvokeRequest;
-import com.zrlog.plugin.message.CapabilityInvokeResult;
-import com.zrlog.plugin.message.NotificationRequest;
-import com.zrlog.plugin.message.Plugin;
-import com.zrlog.plugin.message.PluginCapability;
-import com.zrlog.plugin.message.SchedulerUpdateRequest;
-import com.zrlog.plugin.message.SchedulerUpdateResult;
+import com.zrlog.plugin.message.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -73,7 +67,7 @@ public class PluginNativeImageUtils {
                 Object o = gson.fromJson("{}", clazz);
                 gson.toJson(o);
             } catch (Exception e) {
-                e.printStackTrace();
+                LoggerUtil.getLogger(PluginNativeImageUtils.class).severe("gsonNativeAgentByClazz " + cl.getName() + "  error: " + e.getMessage());
             }
         }
     }
