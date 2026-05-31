@@ -48,6 +48,9 @@ public interface IActionHandler {
     default void notificationPublish(final IOSession session, final MsgPacket msgPacket) {
     }
 
+    default void schedulerQuery(final IOSession session, final MsgPacket msgPacket) {
+    }
+
     default void schedulerUpdate(final IOSession session, final MsgPacket msgPacket) {
     }
 }

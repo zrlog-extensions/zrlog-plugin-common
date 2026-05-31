@@ -19,7 +19,9 @@ public enum ActionType {
     ARTICLE_VISIT_COUNT_ADD_ONE(1, "文章浏览量增加 1"),
     CAPABILITY_INVOKE(1, "调用插件能力"),
     NOTIFICATION_PUBLISH(1, "发布标准插件通知"),
-    SCHEDULER_UPDATE(1, "更新插件定时任务");
+    SCHEDULER_QUERY(0, "查询插件定时任务"),
+    @Deprecated
+    SCHEDULER_UPDATE(0, "插件定时任务只读兼容入口，写入已废弃");
 
     private final int level;
     private final String desc;

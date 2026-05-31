@@ -10,6 +10,7 @@ import com.zrlog.plugin.data.codec.convert.JsonConvertMsgBody;
 import com.zrlog.plugin.message.CapabilityInvokeRequest;
 import com.zrlog.plugin.message.NotificationRequest;
 import com.zrlog.plugin.message.Plugin;
+import com.zrlog.plugin.message.SchedulerQueryRequest;
 import com.zrlog.plugin.message.SchedulerUpdateRequest;
 import com.zrlog.plugin.render.IRenderHandler;
 import com.zrlog.plugin.type.ActionType;
@@ -197,6 +198,23 @@ public class IOSession {
         return msgId;
     }
 
+    public int querySchedule(String capabilityKey, IMsgPacketCallBack msgPacketCallBack) {
+        int msgId = IdUtil.getInt();
+        SchedulerQueryRequest request = new SchedulerQueryRequest();
+        request.setCapabilityKey(capabilityKey);
+        MsgPacket msgPacket = new MsgPacket(request, ContentType.JSON, MsgPacketStatus.SEND_REQUEST, msgId, ActionType.SCHEDULER_QUERY.name());
+        sendMsg(msgPacket, msgPacketCallBack);
+        return msgId;
+    }
+
+    public int querySchedule(String capabilityKey) {
+        return querySchedule(capabilityKey, null);
+    }
+
+    /**
+     * @deprecated Scheduler writes are managed by the runtime scheduler center.
+     */
+    @Deprecated
     public int updateSchedule(String capabilityKey, String cron, Boolean enabled, IMsgPacketCallBack msgPacketCallBack) {
         int msgId = IdUtil.getInt();
         SchedulerUpdateRequest request = new SchedulerUpdateRequest();
@@ -208,22 +226,42 @@ public class IOSession {
         return msgId;
     }
 
+    /**
+     * @deprecated Scheduler writes are managed by the runtime scheduler center.
+     */
+    @Deprecated
     public int updateSchedule(String capabilityKey, String cron, Boolean enabled) {
         return updateSchedule(capabilityKey, cron, enabled, null);
     }
 
+    /**
+     * @deprecated Scheduler writes are managed by the runtime scheduler center.
+     */
+    @Deprecated
     public int updateSchedule(String capabilityKey, String cron, IMsgPacketCallBack msgPacketCallBack) {
         return updateSchedule(capabilityKey, cron, null, msgPacketCallBack);
     }
 
+    /**
+     * @deprecated Scheduler writes are managed by the runtime scheduler center.
+     */
+    @Deprecated
     public int updateSchedule(String capabilityKey, String cron) {
         return updateSchedule(capabilityKey, cron, null, null);
     }
 
+    /**
+     * @deprecated Scheduler writes are managed by the runtime scheduler center.
+     */
+    @Deprecated
     public int updateScheduleEnabled(String capabilityKey, boolean enabled, IMsgPacketCallBack msgPacketCallBack) {
         return updateSchedule(capabilityKey, null, enabled, msgPacketCallBack);
     }
 
+    /**
+     * @deprecated Scheduler writes are managed by the runtime scheduler center.
+     */
+    @Deprecated
     public int updateScheduleEnabled(String capabilityKey, boolean enabled) {
         return updateScheduleEnabled(capabilityKey, enabled, null);
     }

@@ -76,6 +76,6 @@ public class PluginNativeImageUtils {
                 Plugin.class, BlogRunTime.class, Comment.class, CreateArticleRequest.class, PublicInfo.class,
                 TemplatePath.class, UploadFileResponseEntry.class, User.class, BucketVO.class,
                 PluginCapability.class, CapabilityInvokeRequest.class, CapabilityInvokeResult.class, NotificationRequest.class,
-                SchedulerUpdateRequest.class, SchedulerUpdateResult.class));
+                SchedulerQueryRequest.class, SchedulerQueryResult.class, SchedulerUpdateRequest.class, SchedulerUpdateResult.class));
     }
 }
