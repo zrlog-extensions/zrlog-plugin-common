@@ -51,9 +51,12 @@ public class ClientActionHandler implements IActionHandler {
     public void capabilityInvoke(IOSession session, MsgPacket msgPacket) {
         CapabilityInvokeRequest request = new Gson().fromJson(msgPacket.getDataStr(), CapabilityInvokeRequest.class);
         ServiceInvokeResult serviceInvokeResult = handleServiceByName(session, msgPacket, request.getCapabilityKey());
+        if (serviceInvokeResult.isOk()) {
+            return;
+        }
         CapabilityInvokeResult result = new CapabilityInvokeResult();
-        result.setSuccess(serviceInvokeResult.isOk());
-        result.setErrorMessage(result.getErrorMessage());
+        result.setSuccess(false);
+        result.setErrorMessage(serviceInvokeResult.getMessage());
         session.sendJsonMsg(result, msgPacket.getMethodStr(), msgPacket.getMsgId(), MsgPacketStatus.RESPONSE_ERROR);
     }
 
