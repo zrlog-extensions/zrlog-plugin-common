@@ -66,7 +66,7 @@ public class SessionKvRepository implements KvRepository {
         return read(keys.toArray(new String[0]));
     }
 
-    public void write(Map<String, ?> values) {
+    public void write(Map<String, String> values) {
         if (values == null || values.isEmpty()) {
             return;
         }
