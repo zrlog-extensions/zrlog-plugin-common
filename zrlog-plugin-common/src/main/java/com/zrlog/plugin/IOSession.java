@@ -20,7 +20,6 @@ import java.nio.channels.Channel;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 import java.time.Duration;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
@@ -195,13 +194,6 @@ public class IOSession {
     public int publishNotification(NotificationRequest request, IMsgPacketCallBack msgPacketCallBack) {
         int msgId = IdUtil.getInt();
         MsgPacket msgPacket = new MsgPacket(request, ContentType.JSON, MsgPacketStatus.SEND_REQUEST, msgId, ActionType.NOTIFICATION_PUBLISH.name());
-        sendMsg(msgPacket, msgPacketCallBack);
-        return msgId;
-    }
-
-    public int queryNotificationChannels(IMsgPacketCallBack msgPacketCallBack) {
-        int msgId = IdUtil.getInt();
-        MsgPacket msgPacket = new MsgPacket(new HashMap<String, Object>(), ContentType.JSON, MsgPacketStatus.SEND_REQUEST, msgId, ActionType.NOTIFICATION_CHANNEL_QUERY.name());
         sendMsg(msgPacket, msgPacketCallBack);
         return msgId;
     }
