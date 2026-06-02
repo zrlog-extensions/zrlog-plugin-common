@@ -1,5 +1,7 @@
 package com.zrlog.plugin.api;
 
+import com.zrlog.plugin.common.PluginExecutionTimeouts;
+
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
@@ -16,7 +18,7 @@ public @interface ScheduledCapability {
 
     String timezone() default "system";
 
-    int timeoutSeconds() default 60;
+    int timeoutSeconds() default PluginExecutionTimeouts.DEFAULT_EXECUTION_TIMEOUT_SECONDS;
 
     int concurrency() default 1;
 }

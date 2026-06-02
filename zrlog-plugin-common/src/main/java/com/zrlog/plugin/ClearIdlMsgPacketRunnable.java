@@ -1,6 +1,7 @@
 package com.zrlog.plugin;
 
-import java.time.Duration;
+import com.zrlog.plugin.common.PluginExecutionTimeouts;
+
 import java.util.*;
 
 class ClearIdlMsgPacketRunnable implements Runnable {
@@ -16,9 +17,12 @@ class ClearIdlMsgPacketRunnable implements Runnable {
         for (Map<Integer, PipeInfo> pipeMap : pipeMaps) {
             Set<Integer> removedKeys = new HashSet<>();
             for (Map.Entry<Integer, PipeInfo> entry : pipeMap.entrySet()) {
-                long activeTime = System.currentTimeMillis() - entry.getValue().getCratedAt();
-                //max wait 6min
-                if (activeTime >= Duration.ofMinutes(6).toMillis()) {
+                PipeInfo pipeInfo = entry.getValue();
+                Long expireAt = pipeInfo.getExpireAt();
+                if (expireAt == null) {
+                    expireAt = pipeInfo.getCratedAt() + PluginExecutionTimeouts.DEFAULT_EXECUTION_TIMEOUT.toMillis();
+                }
+                if (System.currentTimeMillis() >= expireAt) {
                     removedKeys.add(entry.getKey());
                 }
             }

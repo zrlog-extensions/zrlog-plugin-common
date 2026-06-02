@@ -5,6 +5,7 @@ import com.zrlog.plugin.api.IActionHandler;
 import com.zrlog.plugin.common.IOUtil;
 import com.zrlog.plugin.common.IdUtil;
 import com.zrlog.plugin.common.LoggerUtil;
+import com.zrlog.plugin.common.PluginExecutionTimeouts;
 import com.zrlog.plugin.data.codec.*;
 import com.zrlog.plugin.data.codec.convert.JsonConvertMsgBody;
 import com.zrlog.plugin.message.CapabilityInvokeRequest;
@@ -122,9 +123,15 @@ public class IOSession {
     }
 
     public void sendMsg(MsgPacket msgPacket, IMsgPacketCallBack callBack) {
+        sendMsg(msgPacket, callBack, PluginExecutionTimeouts.DEFAULT_EXECUTION_TIMEOUT);
+    }
+
+    public void sendMsg(MsgPacket msgPacket, IMsgPacketCallBack callBack, Duration responseTimeout) {
         try {
             if (msgPacket.getStatus() == MsgPacketStatus.SEND_REQUEST) {
-                pipeMap.put(msgPacket.getMsgId(), new PipeInfo(msgPacket, null, callBack, System.currentTimeMillis()));
+                long now = System.currentTimeMillis();
+                pipeMap.put(msgPacket.getMsgId(),
+                        new PipeInfo(msgPacket, null, callBack, now, now + responseTimeout(responseTimeout).toMillis()));
             }
             socketEncode.doEncode(this, msgPacket);
         } catch (Exception e) {
@@ -173,10 +180,14 @@ public class IOSession {
     }
 
     public int requestService(String name, Map map, IMsgPacketCallBack msgPacketCallBack) {
+        return requestService(name, map, msgPacketCallBack, PluginExecutionTimeouts.DEFAULT_EXECUTION_TIMEOUT);
+    }
+
+    public int requestService(String name, Map map, IMsgPacketCallBack msgPacketCallBack, Duration responseTimeout) {
         int msgId = IdUtil.getInt();
         map.put("name", name);
         MsgPacket msgPacket = new MsgPacket(map, ContentType.JSON, MsgPacketStatus.SEND_REQUEST, msgId, ActionType.SERVICE.name());
-        sendMsg(msgPacket, msgPacketCallBack);
+        sendMsg(msgPacket, msgPacketCallBack, responseTimeout);
         return msgId;
     }
 
@@ -330,11 +341,13 @@ public class IOSession {
     }
 
     public MsgPacket getResponseMsgPacketByMsgId(int msgId) {
-        return getResponseMsgPacketByMsgId(msgId, Duration.ofDays(2));
+        return getResponseMsgPacketByMsgId(msgId, PluginExecutionTimeouts.DEFAULT_EXECUTION_TIMEOUT);
     }
 
     public MsgPacket getResponseMsgPacketByMsgId(int msgId, Duration readTimeout) {
-        long timeout = readTimeout.toMillis();
+        Duration timeoutDuration = responseTimeout(readTimeout);
+        long timeout = timeoutDuration.toMillis();
+        extendPipeTimeout(msgId, timeoutDuration);
         try {
             int sleepSeek = 10;
             while (true) {
@@ -363,5 +376,19 @@ public class IOSession {
 
     public void clearMessageCacheByMsgId(int msgId) {
         clearIdlMsgPacketRunnable.removePipeByMsgId(msgId);
+    }
+
+    private Duration responseTimeout(Duration readTimeout) {
+        if (readTimeout == null || readTimeout.toMillis() <= 0) {
+            return PluginExecutionTimeouts.DEFAULT_EXECUTION_TIMEOUT;
+        }
+        return readTimeout;
+    }
+
+    private void extendPipeTimeout(int msgId, Duration readTimeout) {
+        PipeInfo pipeInfo = pipeMap.get(msgId);
+        if (pipeInfo != null) {
+            pipeInfo.extendExpireAt(System.currentTimeMillis() + readTimeout.toMillis());
+        }
     }
 }
