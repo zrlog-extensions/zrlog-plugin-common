@@ -71,7 +71,7 @@ public class ClientActionHandler implements IActionHandler {
         try {
             for (Class<? extends IPluginService> serviceClass : pluginServices) {
                 if (supportServiceName(serviceClass, name)) {
-                    serviceClass.newInstance().handle(session, msgPacket);
+                    serviceClass.getDeclaredConstructor().newInstance().handle(session, msgPacket);
                     return new ServiceInvokeResult(0, "");
                 }
             }
@@ -163,8 +163,8 @@ public class ClientActionHandler implements IActionHandler {
         ActionType action = ActionType.valueOf(msgPacket.getMethodStr());
         IPluginAction pluginAction = null;
         try {
-            pluginAction = ((Class<IPluginAction>) session.getAttr().get("_pluginClass")).newInstance();
-        } catch (InstantiationException | IllegalAccessException e) {
+            pluginAction = ((Class<IPluginAction>) session.getAttr().get("_pluginClass")).getDeclaredConstructor().newInstance();
+        } catch (ReflectiveOperationException e) {
             LOGGER.log(Level.SEVERE, "", e);
         }
         if (pluginAction != null) {

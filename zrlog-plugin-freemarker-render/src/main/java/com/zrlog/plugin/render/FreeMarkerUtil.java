@@ -15,7 +15,6 @@ public class FreeMarkerUtil {
             cfg = Class.forName("freemarker.template.Configuration").getDeclaredConstructor().newInstance();
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException |
                  ClassNotFoundException e) {
-            //LOGGER.log(Level.WARNING, "load freemarker error", e);
         }
     }
 
@@ -32,7 +31,6 @@ public class FreeMarkerUtil {
         try {
             cfg.getClass().getMethod("setClassForTemplateLoading", Class.class, String.class).invoke(cfg, FreeMarkerUtil.class, basePath);
         } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-            //LOGGER.log(Level.WARNING, "init freemarker class path error", e);
         }
     }
 }
