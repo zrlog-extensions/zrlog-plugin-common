@@ -16,6 +16,7 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.logging.Level;
 
 public class PluginNativeImageUtils {
 
@@ -49,11 +50,13 @@ public class PluginNativeImageUtils {
                     try {
                         method.invoke(constructor.newInstance(null, null, null));
                     } catch (Exception ex) {
-                        ex.printStackTrace();
+                        LoggerUtil.getLogger(PluginNativeImageUtils.class).log(Level.WARNING,
+                                "Expose controller method failed: " + e.getName() + "#" + method.getName(), ex);
                     }
                 }
             } catch (Exception ex) {
-                ex.printStackTrace();
+                LoggerUtil.getLogger(PluginNativeImageUtils.class).log(Level.WARNING,
+                        "Expose controller failed: " + e.getName(), ex);
             }
         });
     }

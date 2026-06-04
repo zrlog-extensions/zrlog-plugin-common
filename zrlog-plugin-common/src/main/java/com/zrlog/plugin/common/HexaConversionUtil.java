@@ -168,11 +168,4 @@ public class HexaConversionUtil {
                 + (byte) ((b >> 1) & 0x1) + (byte) ((b) & 0x1);
     }
 
-    public static void main(String[] args) {
-        byte[] bs = intToByteArray(23);
-        int i = byteArrayToInt(bs);
-        System.out.println("" + bs[0] + bs[1] + bs[2] + bs[3]);
-        System.out.println(i);
-    }
-
 }

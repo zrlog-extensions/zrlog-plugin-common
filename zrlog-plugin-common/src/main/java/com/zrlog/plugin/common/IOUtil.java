@@ -17,12 +17,12 @@ public class IOUtil {
                 bout.write(tempByte, 0, length);
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "", e);
         } finally {
             try {
                 in.close();
             } catch (IOException e) {
-                LOGGER.log(Level.SEVERE,"", e);
+                LOGGER.log(Level.SEVERE, "", e);
             }
         }
         return bout.toByteArray();
@@ -33,7 +33,7 @@ public class IOUtil {
         try {
             return new String(bytes, "UTF-8");
         } catch (UnsupportedEncodingException e) {
-            LOGGER.log(Level.SEVERE,"", e);
+            LOGGER.log(Level.SEVERE, "", e);
         }
         return new String(bytes);
     }
@@ -49,7 +49,7 @@ public class IOUtil {
             out.write(bytes);
             out.close();
         } catch (IOException e) {
-            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "", e);
         }
     }
 }
