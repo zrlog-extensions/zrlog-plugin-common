@@ -2,6 +2,7 @@ package com.zrlog.plugin;
 
 import com.zrlog.plugin.api.IActionHandler;
 import com.zrlog.plugin.common.LoggerUtil;
+import com.zrlog.plugin.data.codec.ContentType;
 import com.zrlog.plugin.data.codec.MsgPacket;
 import com.zrlog.plugin.data.codec.MsgPacketStatus;
 import com.zrlog.plugin.type.ActionType;
@@ -23,6 +24,8 @@ public class MsgPacketDispose {
         ActionType action = ActionType.valueOf(msgPacket.getMethodStr());
         if (action == ActionType.INIT_CONNECT) {
             actionHandler.initConnect(session, msgPacket);
+        } else if (action == ActionType.HTTP_METHOD && isHeartbeatRequest(msgPacket)) {
+            session.sendMsg(ContentType.BYTE, new byte[0], msgPacket.getMethodStr(), msgPacket.getMsgId(), MsgPacketStatus.RESPONSE_SUCCESS, null);
         } else if (action == ActionType.HTTP_FILE) {
             actionHandler.getFile(session, msgPacket);
         } else if (action == ActionType.GET_WEBSITE) {
@@ -70,5 +73,9 @@ public class MsgPacketDispose {
         } else {
             LOGGER.log(Level.WARNING, "UnSupport Method " + action);
         }
+    }
+
+    private boolean isHeartbeatRequest(MsgPacket msgPacket) {
+        return msgPacket.getContentType() == ContentType.BYTE && msgPacket.getDataLength() == 0;
     }
 }
