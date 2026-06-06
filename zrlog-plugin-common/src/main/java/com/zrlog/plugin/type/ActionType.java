@@ -21,6 +21,7 @@ public enum ActionType {
     NOTIFICATION_PUBLISH(1, "发布标准插件通知"),
     NOTIFICATION_CHANNEL_QUERY(0, "查询标准插件通知渠道"),
     SCHEDULER_QUERY(0, "查询插件定时任务"),
+    PLUGIN_PROCESS_QUERY(0, "查询插件进程资源信息"),
     @Deprecated
     SCHEDULER_UPDATE(0, "插件定时任务只读兼容入口，写入已废弃");
 

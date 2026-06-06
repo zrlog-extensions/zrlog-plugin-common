@@ -222,6 +222,22 @@ public class IOSession {
         return querySchedule(capabilityKey, null);
     }
 
+    public int queryPluginProcess(IMsgPacketCallBack msgPacketCallBack, Duration responseTimeout) {
+        int msgId = IdUtil.getInt();
+        MsgPacket msgPacket = new MsgPacket(new byte[0], ContentType.BYTE, MsgPacketStatus.SEND_REQUEST, msgId,
+                ActionType.PLUGIN_PROCESS_QUERY.name());
+        sendMsg(msgPacket, msgPacketCallBack, responseTimeout);
+        return msgId;
+    }
+
+    public int queryPluginProcess(IMsgPacketCallBack msgPacketCallBack) {
+        return queryPluginProcess(msgPacketCallBack, PluginExecutionTimeouts.DEFAULT_EXECUTION_TIMEOUT);
+    }
+
+    public int queryPluginProcess() {
+        return queryPluginProcess(null);
+    }
+
     /**
      * @deprecated Scheduler writes are managed by the runtime scheduler center.
      */

@@ -36,6 +36,8 @@ public class MsgPacketDispose {
             actionHandler.addComment(session, msgPacket);
         } else if (action == ActionType.SERVICE) {
             actionHandler.service(session, msgPacket);
+        } else if (action == ActionType.PLUGIN_PROCESS_QUERY) {
+            actionHandler.pluginProcessQuery(session, msgPacket);
         } else if (action.name().startsWith("PLUGIN")) {
             actionHandler.plugin(session, msgPacket);
         } else if (action == ActionType.HTTP_METHOD) {

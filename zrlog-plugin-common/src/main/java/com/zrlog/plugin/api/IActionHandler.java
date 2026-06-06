@@ -54,6 +54,9 @@ public interface IActionHandler {
     default void schedulerQuery(final IOSession session, final MsgPacket msgPacket) {
     }
 
+    default void pluginProcessQuery(final IOSession session, final MsgPacket msgPacket) {
+    }
+
     default void schedulerUpdate(final IOSession session, final MsgPacket msgPacket) {
     }
 }

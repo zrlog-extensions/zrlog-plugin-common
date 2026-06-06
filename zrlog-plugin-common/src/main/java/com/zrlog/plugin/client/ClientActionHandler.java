@@ -13,6 +13,7 @@ import com.zrlog.plugin.data.codec.MsgPacket;
 import com.zrlog.plugin.data.codec.MsgPacketStatus;
 import com.zrlog.plugin.message.CapabilityInvokeRequest;
 import com.zrlog.plugin.message.CapabilityInvokeResult;
+import com.zrlog.plugin.message.PluginProcessInfo;
 import com.zrlog.plugin.type.ActionType;
 import com.zrlog.plugin.type.RunType;
 
@@ -58,6 +59,20 @@ public class ClientActionHandler implements IActionHandler {
         result.setSuccess(false);
         result.setErrorMessage(serviceInvokeResult.getMessage());
         session.sendJsonMsg(result, msgPacket.getMethodStr(), msgPacket.getMsgId(), MsgPacketStatus.RESPONSE_ERROR);
+    }
+
+    @Override
+    public void pluginProcessQuery(IOSession session, MsgPacket msgPacket) {
+        try {
+            PluginProcessInfo info = PluginProcessInfoCollector.current(session == null ? null : session.getPlugin());
+            session.sendJsonMsg(info, msgPacket.getMethodStr(), msgPacket.getMsgId(), MsgPacketStatus.RESPONSE_SUCCESS);
+        } catch (RuntimeException e) {
+            PluginProcessInfo info = new PluginProcessInfo();
+            info.setAlive(Boolean.FALSE);
+            info.setSampledAt(System.currentTimeMillis());
+            info.setErrorMessage(e.getMessage() == null ? "query plugin process failed" : e.getMessage());
+            session.sendJsonMsg(info, msgPacket.getMethodStr(), msgPacket.getMsgId(), MsgPacketStatus.RESPONSE_ERROR);
+        }
     }
 
     private ServiceInvokeResult handleServiceByName(IOSession session, MsgPacket msgPacket, String name) {
