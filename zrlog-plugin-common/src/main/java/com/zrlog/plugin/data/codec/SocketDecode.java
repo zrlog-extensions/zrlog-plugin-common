@@ -1,9 +1,13 @@
 package com.zrlog.plugin.data.codec;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 import com.zrlog.plugin.IOSession;
 import com.zrlog.plugin.RunConstants;
 import com.zrlog.plugin.common.HexaConversionUtil;
 import com.zrlog.plugin.common.LoggerUtil;
+import com.zrlog.plugin.message.Plugin;
+import com.zrlog.plugin.type.ActionType;
 import com.zrlog.plugin.type.RunType;
 
 import java.io.EOFException;
@@ -17,6 +21,7 @@ import java.util.logging.Logger;
 public class SocketDecode {
 
     private static final Logger LOGGER = LoggerUtil.getLogger(SocketDecode.class);
+    private static final Gson GSON = new Gson();
 
     private MsgPacket packet;
     private ByteBuffer header = ByteBuffer.allocate(7);
@@ -89,15 +94,30 @@ public class SocketDecode {
             flag = !packet.getData().hasRemaining();
         }
         if (flag) {
+            bindPluginLogLabelIfInitConnect(session, packet);
             session.getReceiveMsgCounter().incrementAndGet();
             if (RunConstants.runType == RunType.DEV) {
-                LOGGER.info("receive <<< " + session.getReceiveMsgCounter().get() + " " + packet);
+                LOGGER.info(session.logPrefix("receive <<< " + session.getReceiveMsgCounter().get() + " " + packet));
             }
             MsgPacket cpMsgPacket = deepCopyMsg(packet);
             messageHandlerExecutor.execute(() -> session.dispose(cpMsgPacket));
             reset();
         }
         return flag;
+    }
+
+    private void bindPluginLogLabelIfInitConnect(IOSession session, MsgPacket msgPacket) {
+        if (session == null || msgPacket == null || !ActionType.INIT_CONNECT.name().equals(msgPacket.getMethodStr())
+                || msgPacket.getContentType() != ContentType.JSON) {
+            return;
+        }
+        try {
+            Plugin plugin = GSON.fromJson(msgPacket.getDataStr(), Plugin.class);
+            if (plugin != null) {
+                session.setPluginLogLabel(plugin.getShortName());
+            }
+        } catch (JsonSyntaxException ignored) {
+        }
     }
 
     private static MsgPacket deepCopyMsg(MsgPacket msgPacket) {

@@ -34,13 +34,15 @@ import java.util.logging.Logger;
 
 public class IOSession {
 
+    public static final String PLUGIN_LOG_LABEL_ATTR = "_zrlog_plugin_log_label";
+
     private static final Logger LOGGER = LoggerUtil.getLogger(IOSession.class);
 
     private final Map<String, Object> attr = new ConcurrentHashMap<>();
     private final Map<Integer, PipeInfo> pipeMap = new ConcurrentHashMap<>();
     private final Map<String, Object> systemAttr = new ConcurrentHashMap<>();
     private final IActionHandler actionHandler;
-    private Plugin plugin;
+    private volatile Plugin plugin;
     private final AtomicLong sendMsgCounter = new AtomicLong(0);
     private final AtomicLong receiveMsgCounter = new AtomicLong(0);
     private final MsgPacketDispose msgPacketDispose = new MsgPacketDispose();
@@ -91,6 +93,50 @@ public class IOSession {
 
     public void setPlugin(Plugin plugin) {
         this.plugin = plugin;
+        setPluginLogLabel(pluginLogLabel(plugin));
+    }
+
+    public void setPluginLogLabel(String label) {
+        String normalizedLabel = normalize(label);
+        if (normalizedLabel == null) {
+            systemAttr.remove(PLUGIN_LOG_LABEL_ATTR);
+        } else {
+            systemAttr.put(PLUGIN_LOG_LABEL_ATTR, normalizedLabel);
+        }
+    }
+
+    public String logPrefix(String message) {
+        String label = pluginLogLabel();
+        if (label == null) {
+            return message;
+        }
+        return "[" + label + "] " + message;
+    }
+
+    private String pluginLogLabel() {
+        Object label = systemAttr.get(PLUGIN_LOG_LABEL_ATTR);
+        if (label != null) {
+            String normalized = normalize(label.toString());
+            if (normalized != null) {
+                return normalized;
+            }
+        }
+        return pluginLogLabel(plugin);
+    }
+
+    private String pluginLogLabel(Plugin plugin) {
+        if (plugin == null) {
+            return null;
+        }
+        return normalize(plugin.getShortName());
+    }
+
+    private String normalize(String value) {
+        if (value == null) {
+            return null;
+        }
+        String trimmed = value.trim();
+        return trimmed.isEmpty() ? null : trimmed;
     }
 
     public <T> T getResponseSync(ContentType contentType, Object data, ActionType actionType, Class<T> clazz) {
@@ -128,6 +174,7 @@ public class IOSession {
 
     public void sendMsg(MsgPacket msgPacket, IMsgPacketCallBack callBack, Duration responseTimeout) {
         try {
+            ensurePluginLogLabel();
             if (msgPacket.getStatus() == MsgPacketStatus.SEND_REQUEST) {
                 long now = System.currentTimeMillis();
                 pipeMap.put(msgPacket.getMsgId(),
@@ -137,6 +184,13 @@ public class IOSession {
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "", e);
         }
+    }
+
+    private void ensurePluginLogLabel() {
+        if (systemAttr.get(PLUGIN_LOG_LABEL_ATTR) != null) {
+            return;
+        }
+        setPluginLogLabel(pluginLogLabel(plugin));
     }
 
     public void sendMsg(MsgPacket msgPacket) {

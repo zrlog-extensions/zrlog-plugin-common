@@ -39,7 +39,7 @@ public class SocketEncode {
                 }
                 session.getSendMsgCounter().incrementAndGet();
                 if (RunConstants.runType == RunType.DEV) {
-                    LOGGER.info("send >>> " + session.getSendMsgCounter().get() + " " + msgPacket);
+                    LOGGER.info(session.logPrefix("send >>> " + session.getSendMsgCounter().get() + " " + msgPacket));
                 }
                 channel.register(selector, SelectionKey.OP_READ);
             }
