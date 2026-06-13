@@ -18,13 +18,14 @@ public class MsgPacketDispose {
     private static final Logger LOGGER = LoggerUtil.getLogger(MsgPacketDispose.class);
 
     public void handler(final IOSession session, final MsgPacket msgPacket, IActionHandler actionHandler) {
-        if (msgPacket.getStatus() == MsgPacketStatus.RESPONSE_SUCCESS || msgPacket.getStatus() == MsgPacketStatus.RESPONSE_ERROR) {
-            return;
-        }
         ActionType action = ActionType.valueOf(msgPacket.getMethodStr());
         if (action == ActionType.INIT_CONNECT) {
             actionHandler.initConnect(session, msgPacket);
-        } else if (action == ActionType.HTTP_METHOD && isHeartbeatRequest(msgPacket)) {
+        }
+        if (msgPacket.getStatus() == MsgPacketStatus.RESPONSE_SUCCESS || msgPacket.getStatus() == MsgPacketStatus.RESPONSE_ERROR) {
+            return;
+        }
+        if (action == ActionType.HTTP_METHOD && isHeartbeatRequest(msgPacket)) {
             session.sendMsg(ContentType.BYTE, new byte[0], msgPacket.getMethodStr(), msgPacket.getMsgId(), MsgPacketStatus.RESPONSE_SUCCESS, null);
         } else if (action == ActionType.HTTP_FILE) {
             actionHandler.getFile(session, msgPacket);
