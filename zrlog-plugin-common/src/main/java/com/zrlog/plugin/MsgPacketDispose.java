@@ -21,6 +21,7 @@ public class MsgPacketDispose {
         ActionType action = ActionType.valueOf(msgPacket.getMethodStr());
         if (action == ActionType.INIT_CONNECT) {
             actionHandler.initConnect(session, msgPacket);
+            return;
         }
         if (msgPacket.getStatus() == MsgPacketStatus.RESPONSE_SUCCESS || msgPacket.getStatus() == MsgPacketStatus.RESPONSE_ERROR) {
             return;
