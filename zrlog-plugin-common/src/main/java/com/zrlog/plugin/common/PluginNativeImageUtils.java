@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -46,7 +47,10 @@ public class PluginNativeImageUtils {
             Constructor constructor;
             try {
                 constructor = e.getConstructor(IOSession.class, MsgPacket.class, HttpRequestInfo.class);
-                for (Method method : e.getMethods()) {
+                for (Method method : e.getDeclaredMethods()) {
+                    if (!Modifier.isPublic(method.getModifiers())) {
+                        continue;
+                    }
                     try {
                         method.invoke(constructor.newInstance(null, null, null));
                     } catch (Exception ex) {
