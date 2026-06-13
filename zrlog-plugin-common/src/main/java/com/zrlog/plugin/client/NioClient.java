@@ -158,7 +158,10 @@ public class NioClient {
                             if (connectHandler != null) {
                                 session.getAttr().put("_connectHandle", connectHandler);
                             }
-                            session.sendJsonMsg(plugin, ActionType.INIT_CONNECT.name(), IdUtil.getInt(), MsgPacketStatus.SEND_REQUEST);
+                            IOSession finalSession = session;
+                            session.sendJsonMsg(plugin, ActionType.INIT_CONNECT.name(), IdUtil.getInt(), MsgPacketStatus.SEND_REQUEST, (msgPacket) -> {
+                                actionHandler.initConnect(finalSession, msgPacket);
+                            });
                         } else if (selectionKey.isReadable()) {
                             if (Objects.isNull(session)) {
                                 throw new RuntimeException("socketDecode is null");
