@@ -1,5 +1,8 @@
 package com.zrlog.plugin.client;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.zrlog.plugin.IOSession;
 import com.zrlog.plugin.RunConstants;
 import com.zrlog.plugin.api.*;
@@ -20,6 +23,7 @@ import com.zrlog.plugin.type.RunType;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetSocketAddress;
+import java.nio.charset.StandardCharsets;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
@@ -30,6 +34,7 @@ import java.util.logging.Level;
 public class NioClient {
 
 
+    private static final Gson GSON = new Gson();
     private final IConnectHandler connectHandler;
     private final IRenderHandler renderHandler;
     private final IActionHandler actionHandler;
@@ -79,15 +84,10 @@ public class NioClient {
             plugin.setVersion(properties.getProperty("version", ""));
             plugin.setName(properties.getProperty("name", ""));
             plugin.setDesc(properties.getProperty("desc", ""));
-            if (properties.get("dependentService") != null) {
-                plugin.setDependentService(new LinkedHashSet<>(Arrays.asList(properties.get("dependentService").toString().split(","))));
-            }
-            if (properties.get("paths") != null) {
-                plugin.setPaths(new LinkedHashSet<>(Arrays.asList(properties.get("paths").toString().split(","))));
-            }
-            if (properties.get("actions") != null) {
-                plugin.setActions(new LinkedHashSet<>(Arrays.asList(properties.get("actions").toString().split(","))));
-            }
+            plugin.setDependentService(propertySet(properties, "dependentService"));
+            plugin.setPaths(propertySet(properties, "paths"));
+            plugin.setActions(propertySet(properties, "actions"));
+            plugin.setCacheableStaticPaths(readCacheableStaticPaths(properties));
             plugin.setShortName(properties.getProperty("shortName", ""));
             plugin.setAuthor(properties.getProperty("author", ""));
             plugin.setIndexPage(properties.getProperty("indexPage", ""));
@@ -125,6 +125,109 @@ public class NioClient {
         }
         InetSocketAddress serverAddress = new InetSocketAddress("127.0.0.1", serverPort);
         connectServer(serverAddress, classList, plugin, pluginAction, serviceList);
+    }
+
+    private static Set<String> propertySet(Properties properties, String key) {
+        Set<String> values = new LinkedHashSet<>();
+        String value = properties.getProperty(key);
+        if (value == null) {
+            return values;
+        }
+        for (String item : value.split(",")) {
+            String itemValue = item.trim();
+            if (!itemValue.isEmpty()) {
+                values.add(itemValue);
+            }
+        }
+        return values;
+    }
+
+    private static Set<String> readCacheableStaticPaths(Properties properties) {
+        Set<String> paths = new LinkedHashSet<>();
+        for (String path : propertySet(properties, "cacheableStaticPaths")) {
+            addNormalizedCacheableStaticPath(paths, path);
+        }
+        paths.addAll(readAssetManifestStaticPaths("/asset-manifest.json"));
+        paths.addAll(readAssetManifestStaticPaths("/templates/asset-manifest.json"));
+        return paths;
+    }
+
+    private static Set<String> readAssetManifestStaticPaths(String resourcePath) {
+        try (InputStream inputStream = NioClient.class.getResourceAsStream(resourcePath)) {
+            if (inputStream == null) {
+                return new LinkedHashSet<>();
+            }
+            return parseAssetManifestStaticPaths(new String(IOUtil.getByteByInputStream(inputStream), StandardCharsets.UTF_8));
+        } catch (Exception e) {
+            LoggerUtil.getLogger(NioClient.class).log(Level.WARNING, "read asset manifest " + resourcePath + " error", e);
+            return new LinkedHashSet<>();
+        }
+    }
+
+    static Set<String> parseAssetManifestStaticPaths(String assetManifestJson) {
+        Set<String> paths = new LinkedHashSet<>();
+        if (assetManifestJson == null || assetManifestJson.trim().isEmpty()) {
+            return paths;
+        }
+        JsonObject manifest = GSON.fromJson(assetManifestJson, JsonObject.class);
+        if (manifest == null) {
+            return paths;
+        }
+        collectStaticPaths(manifest, paths);
+        return paths;
+    }
+
+    private static void collectStaticPaths(JsonElement element, Set<String> paths) {
+        if (element == null || element.isJsonNull()) {
+            return;
+        }
+        if (element.isJsonPrimitive() && element.getAsJsonPrimitive().isString()) {
+            addNormalizedCacheableStaticPath(paths, element.getAsString());
+            return;
+        }
+        if (element.isJsonArray()) {
+            for (JsonElement child : element.getAsJsonArray()) {
+                collectStaticPaths(child, paths);
+            }
+            return;
+        }
+        if (element.isJsonObject()) {
+            for (Map.Entry<String, JsonElement> entry : element.getAsJsonObject().entrySet()) {
+                collectStaticPaths(entry.getValue(), paths);
+            }
+        }
+    }
+
+    private static void addNormalizedCacheableStaticPath(Set<String> paths, String value) {
+        String path = normalizeCacheableStaticPath(value);
+        if (path != null) {
+            paths.add(path);
+        }
+    }
+
+    private static String normalizeCacheableStaticPath(String value) {
+        if (value == null) {
+            return null;
+        }
+        String path = value.trim();
+        if (path.isEmpty()) {
+            return null;
+        }
+        int queryIndex = path.indexOf('?');
+        if (queryIndex >= 0) {
+            path = path.substring(0, queryIndex);
+        }
+        int fragmentIndex = path.indexOf('#');
+        if (fragmentIndex >= 0) {
+            path = path.substring(0, fragmentIndex);
+        }
+        int staticIndex = path.indexOf("/static/");
+        if (staticIndex >= 0) {
+            path = path.substring(staticIndex);
+        } else if (path.startsWith("static/")) {
+            path = "/" + path;
+        }
+        return path.startsWith("/static/") ? path : null;
     }
 
     private void connectServer(InetSocketAddress serverAddress, List<Class<?>> classList, Plugin plugin, Class<? extends IPluginAction> pluginAction, List<Class<? extends IPluginService>> serviceList) {

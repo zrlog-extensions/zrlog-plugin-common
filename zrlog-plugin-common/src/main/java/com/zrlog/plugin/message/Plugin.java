@@ -22,6 +22,7 @@ public class Plugin {
     private String previewImageBase64;
     private Set<String> services = new LinkedHashSet<>();
     private Set<String> dependentService = new LinkedHashSet<>();
+    private Set<String> cacheableStaticPaths = new LinkedHashSet<>();
     private List<PluginCapability> capabilities = new ArrayList<>();
 
     public String getVersion() {
@@ -102,6 +103,14 @@ public class Plugin {
 
     public void setDependentService(Set<String> dependentService) {
         this.dependentService = dependentService;
+    }
+
+    public Set<String> getCacheableStaticPaths() {
+        return cacheableStaticPaths;
+    }
+
+    public void setCacheableStaticPaths(Set<String> cacheableStaticPaths) {
+        this.cacheableStaticPaths = cacheableStaticPaths;
     }
 
     public String getId() {
