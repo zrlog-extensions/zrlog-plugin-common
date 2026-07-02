@@ -13,7 +13,9 @@ import com.zrlog.plugin.data.codec.MsgPacket;
 import com.zrlog.plugin.data.codec.MsgPacketStatus;
 import com.zrlog.plugin.message.CapabilityInvokeRequest;
 import com.zrlog.plugin.message.CapabilityInvokeResult;
+import com.zrlog.plugin.message.InitConnectRequest;
 import com.zrlog.plugin.message.PluginProcessInfo;
+import com.zrlog.plugin.message.ServiceRequest;
 import com.zrlog.plugin.type.ActionType;
 import com.zrlog.plugin.type.RunType;
 
@@ -23,7 +25,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -40,8 +41,8 @@ public class ClientActionHandler implements IActionHandler {
     public void service(IOSession session, MsgPacket msgPacket) {
         String serviceName = null;
         if (msgPacket.getContentType() == ContentType.JSON) {
-            Map<String, Object> map = new Gson().fromJson(msgPacket.getDataStr(), Map.class);
-            serviceName = (String) map.get("name");
+            ServiceRequest request = new Gson().fromJson(msgPacket.getDataStr(), ServiceRequest.class);
+            serviceName = request == null ? null : request.getName();
         }
         if (!handleServiceByName(session, msgPacket, serviceName).isOk()) {
             session.sendJsonMsg(new HashMap<>(), msgPacket.getMethodStr(), msgPacket.getMsgId(), MsgPacketStatus.RESPONSE_ERROR);
@@ -111,8 +112,8 @@ public class ClientActionHandler implements IActionHandler {
 
     @Override
     public void initConnect(IOSession session, MsgPacket msgPacket) {
-        Map<String, Object> map = new Gson().fromJson(msgPacket.getDataStr(), Map.class);
-        RunConstants.runType = RunType.valueOf(map.get("runType").toString());
+        InitConnectRequest request = new Gson().fromJson(msgPacket.getDataStr(), InitConnectRequest.class);
+        RunConstants.runType = RunType.valueOf(request.getRunType());
         IConnectHandler connectHandler = (IConnectHandler) session.getAttr().get("_connectHandle");
         if (connectHandler != null) {
             connectHandler.handler(session, msgPacket);

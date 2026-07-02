@@ -2,6 +2,7 @@ package com.zrlog.plugin.common;
 
 import com.zrlog.plugin.IOSession;
 import com.zrlog.plugin.data.codec.ContentType;
+import com.zrlog.plugin.message.WebsiteKeyRequest;
 import com.zrlog.plugin.type.ActionType;
 
 import java.util.Collection;
@@ -70,14 +71,12 @@ public class SessionKvRepository implements KvRepository {
         if (values == null || values.isEmpty()) {
             return;
         }
-        session.getResponseSync(ContentType.JSON, values, ActionType.SET_WEBSITE, Map.class);
+        session.getResponseSync(ContentType.JSON, values, ActionType.SET_WEBSITE, Object.class);
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     private Map<String, Object> readByKeyExpression(String keyExpression) {
-        Map<String, String> request = new HashMap<>();
-        request.put("key", keyExpression);
-        Map response = session.getResponseSync(ContentType.JSON, request, ActionType.GET_WEBSITE, Map.class);
+        Map response = session.getResponseSync(ContentType.JSON, WebsiteKeyRequest.of(keyExpression), ActionType.GET_WEBSITE, Map.class);
         if (response == null || response.isEmpty()) {
             return Collections.emptyMap();
         }
