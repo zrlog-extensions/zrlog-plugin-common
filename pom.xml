@@ -6,9 +6,9 @@
     <modelVersion>4.0.0</modelVersion>
     <version>4.0.5-SNAPSHOT</version>
     <packaging>pom</packaging>
-    <description>ZrLog plugin core</description>
-    <name>ZrLog plugin core</name>
-    <url>https://www.zrlog.com/plugin/</url>
+    <description>ZrLog plugin protocol and shared libraries</description>
+    <name>ZrLog Plugin Common</name>
+    <url>https://github.com/zrlog/zrlog-plugin-common</url>
 
     <modules>
         <module>zrlog-plugin-common</module>
@@ -30,14 +30,14 @@
         </developer>
     </developers>
     <scm>
-        <connection>scm:git:https://github.com/94fzb/zrlog-plugin-common</connection>
-        <developerConnection>scm:git:https://github.com/94fzb/zrlog-plugin-common</developerConnection>
-        <url>https://github.com/94fzb/zrlog-plugin-common</url>
+        <connection>scm:git:https://github.com/zrlog/zrlog-plugin-common</connection>
+        <developerConnection>scm:git:https://github.com/zrlog/zrlog-plugin-common</developerConnection>
+        <url>https://github.com/zrlog/zrlog-plugin-common</url>
         <tag>zrlog-plugin-parent-3.0.5-SNAPSHOT</tag>
     </scm>
     <issueManagement>
         <system>Github Issue</system>
-        <url>https://github.com/94fzb/zrlog-plugin-common</url>
+        <url>https://github.com/zrlog/zrlog-plugin-common</url>
     </issueManagement>
     <licenses>
         <license>
